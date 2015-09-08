@@ -8,6 +8,7 @@ import Ad from '../components/Ad';
 import BaseComponent from './BaseComponent';
 import CommentPreview from '../components/CommentPreview';
 import Listing from '../components/Listing';
+import InfiniteScroller from '../components/infiniteScroller';
 
 const _AD_LOCATION = 11;
 
@@ -178,9 +179,18 @@ class ListingList extends BaseComponent {
     if (props.showAds && listings.length) {
       listings.splice(this.state.adLocation, 0, this.buildAd());
     }
-
+    var height = 
     return (
-      <div ref='root'>{listings}</div>
+      <div ref='root'>
+      <InfiniteScroller
+        averageElementHeight={100}
+        rows={props.listings}
+        renderRow={(el) => {return el}}
+        containerHeight={691}
+      >
+      {listings}
+      </InfiniteScroller>
+      </div>
     );
   }
 
