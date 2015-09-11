@@ -185,13 +185,6 @@ class IndexPage extends BasePage {
             compact={compact}
             subredditTitle={subreddit}
           />
-          <div className='pageNav IndexPage-buttons-holder-holder'>
-            <div className='col-xs-12 IndexPage-buttons-holder'>
-              <p className={'IndexPage-buttons' + (compact ? ' compact' : '')}>
-                { prevButton } { nextButton }
-              </p>
-            </div>
-          </div>
         </div>
 
         { tracking }

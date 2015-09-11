@@ -185,7 +185,7 @@ function initialize(bindLinks) {
   var app = new App(config);
   globals().app = app;
 
-  app.emitter.setMaxListeners(30);
+  app.emitter.setMaxListeners(40);
 
   if (app.getState('token')) {
     var now = new Date();

@@ -4,6 +4,7 @@ import globals from '../../globals';
 import mobilify from '../../lib/mobilify';
 import propTypes from '../../propTypes';
 import short from '../../lib/formatDifference';
+import checkVisibility from '../../lib/checkVisibility';
 
 import AutoTween from '../components/AutoTween';
 import BaseComponent from './BaseComponent';
@@ -29,7 +30,7 @@ class Listing extends BaseComponent {
     this.state = {
       compact: compact,
       expanded: false,
-      loaded: false,
+      loaded: true,
       tallestHeight: 0,
       reported: false,
       hidden: false,
@@ -310,12 +311,46 @@ class Listing extends BaseComponent {
       globals().app.on(constants.RESIZE, this.resize);
       this.resize();
     }
+
+    if (this.props.isFirstOrLast) {
+      globals().app.on('infinite:scroll', this.handleParentScroll.bind(this))  
+    }
+
+    if (!this.props.loadingDone) {
+      var el = React.findDOMNode(this);
+      var visible = checkVisibility(el, this.props.getScrollContainer());
+      globals().app.emit('infinite:loadOneMore', visible.distanceBelowBottom > 200);      
+    }
+
+  }
+
+  componentDidUpdate() {
+    if (this.props.isFirstOrLast) {
+      globals().app.on('infinite:scroll', this.handleParentScroll.bind(this));      
+    } else {
+      globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));      
+    }
+  }
+
+  handleParentScroll(e) {
+    var el = React.findDOMNode(this);
+    var posData = checkVisibility(el, this.props.getScrollContainer());
+    // update visible status if necessary)
+
+    if (posData.distanceAboveTop > 300 || posData.distanceBelowBottom > 300) {
+      globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));
+    }
+
+    this.props.updateStatus(posData, this.props.listingsIndex);  
+    
   }
 
   componentWillUnmount() {
     if (this.props.single) {
       globals().app.off(constants.RESIZE, this.resize);
     }
+    var scrollContainer = this.props.getScrollContainer();
+    globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));
   }
 
   checkPos(winHeight) {
