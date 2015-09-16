@@ -4,16 +4,17 @@ import globals from '../../globals';
 import propTypes from '../../propTypes';
 import uniq from 'lodash/array/uniq';
 import throttle from 'lodash/function/throttle';
+import findIndex from 'lodash/array/findIndex';
+import checkVisibility from '../../lib/checkVisibility';
 
 import Ad from '../components/Ad';
 import BaseComponent from './BaseComponent';
 import CommentPreview from '../components/CommentPreview';
 import Listing from '../components/Listing';
-import InfiniteScroller from '../components/infiniteScroller';
 
 const _AD_LOCATION = 11;
 
-class ListingList extends BaseComponent {
+class ListingList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -26,8 +27,8 @@ class ListingList extends BaseComponent {
 
     this._lazyLoad = this._lazyLoad.bind(this);
     this._resize = this._resize.bind(this);
-    this.loadChildren = this.loadChildren.bind(this);
-    this.listingsWrapScroll = throttle(this.listingsWrapScroll.bind(this), 200);
+    this.loadChild = this.loadChild.bind(this);
+    this.listingsWrapScroll = throttle(this.listingsWrapScroll.bind(this), 50);
   }
 
   componentDidMount() {
@@ -37,10 +38,9 @@ class ListingList extends BaseComponent {
     if (typeof this.props.compact === 'undefined') {
       this._onCompactToggle = this._onCompactToggle.bind(this);
       globals().app.on(constants.COMPACT_TOGGLE, this._onCompactToggle);
-    }    
+    }
 
-    globals().app.on("infinite:loadOneMore", this.loadChildren)
-    this.loadChildren();
+    this.loadChild();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -50,6 +50,19 @@ class ListingList extends BaseComponent {
     }
     if (prevProps.listings !== this.props.listings) {
       this._addListeners();
+    }
+
+    if (!this.state.loadingDone) {
+      var container = this.getNode();
+      var el = React.findDOMNode(this.refs.end);
+      if (el) {
+        var posData = checkVisibility(el, container);
+      }
+      if (!el || posData.distanceBelowBottom < 200) {
+        this.loadChild();       
+      } else {
+        this.setState({loadingDone: true});
+      }
     }
   }
 
@@ -66,27 +79,6 @@ class ListingList extends BaseComponent {
     if (typeof this.props.compact === 'undefined') {
       globals().app.off(constants.COMPACT_TOGGLE, this._onCompactToggle);
     }
-    globals().app.off("infinite:loadOneMore", this.loadChildren)
-  }
-
-  loadChildren(lastWasBelowBottom) {
-    if (lastWasBelowBottom) {
-      globals().app.off("infinite:loadOneMore", this.loadChildren);
-      var loadingDone = true;
-    }
-
-    var visibleItems = this.state.visibleItems.slice();
-    if (visibleItems.length <= 0) {
-      visibleItems.push({listing: this.props.listings[0], index: 0})      
-    } else {
-      var length = visibleItems.length;
-      visibleItems.push({listing: this.props.listings[length], index: length});
-    }
-    var newState = {visibleItems: visibleItems};
-    if (loadingDone) {
-      newState.loadingDone = loadingDone;
-    }
-    this.setState(newState);
   }
 
   _getLoadedDistance () {
@@ -185,82 +177,143 @@ class ListingList extends BaseComponent {
     );
   }
 
+  loadChild() {
+    var visibleItems = this.state.visibleItems.slice();
+
+    if (visibleItems.length <= 0) {
+      visibleItems.push({listing: this.props.listings[0]})      
+    } else {
+      var length = visibleItems.length;
+      visibleItems.push({listing: this.props.listings[length]});
+    }
+
+    visibleItems.map((item, i, list) => {
+      if (i === 0) {
+        item.ref = 'start';
+      } else if (i === list.length - 1 && i !== 0) {
+        item.ref = 'end';
+      } else {
+        item.ref = null;
+      }
+    });
+
+    this.setState({visibleItems: visibleItems});
+  }
+
+  listingsWrapScroll(e) {
+    var container = this.getNode();
+    var endEl = React.findDOMNode(this.refs.end);
+    var startEl = React.findDOMNode(this.refs.start);
+    try {
+    var startChange = this.getStartElChanges(checkVisibility(startEl, container));  
+   } catch(e) {debugger}
+    
+    if (!startChange) {debugger;}
+    var endChange = this.getEndElChanges(checkVisibility(endEl, container));
+    this.updateVisibleItems(startChange, endChange);
+  }
+
+  updateVisibleItems(startChange, endChange) {
+    var visibleItems = this.state.visibleItems.slice();
+    var length = visibleItems.length;
+    var startIndex = findIndex(visibleItems, 'ref', 'start');
+    var endIndex = findIndex(visibleItems, 'ref', 'end');
+
+    switch (startChange.action) {
+      case 'remove':
+      if (endIndex === this.props.listings.length - 1) {break;}
+        visibleItems[startIndex].height = startChange.height;
+        visibleItems[startIndex].ref = null;
+        visibleItems[startIndex + 1].ref = 'start';
+        break;
+      case 'add':
+        if (startIndex === 0 || !startIndex) {break;}
+
+        visibleItems[startIndex].ref = null;
+        var num = 2
+        if (!visibleItems[startIndex - 2]) {
+          num = 1;
+        }
+        visibleItems[startIndex - num].ref = 'start';
+        break;
+    }
+    if (!endChange) {debugger;}
+    switch (endChange.action) {
+      case 'remove':
+        if (endIndex === 3) {debugger;}
+        visibleItems[endIndex].height = endChange.height;
+        visibleItems[endIndex].ref = null;
+        if (!visibleItems[endIndex - 1]) {debugger;}
+        visibleItems[endIndex - 1].ref = 'end';
+        console.log('removed from end')
+        break;
+      case 'add':
+        if (endIndex + 2 === this.props.listings.length - 1) {break;}
+
+        if (visibleItems[endIndex + 1]) {
+          visibleItems[endIndex].ref = null;
+          visibleItems[endIndex + 1].ref = 'end';
+        } else {
+          visibleItems[endIndex].ref = null;
+          visibleItems.push({
+            listing: this.props.listings[endIndex + 1],
+            ref: null
+          });
+          visibleItems.push({
+            listing: this.props.listings[endIndex + 2],
+            ref: 'end'
+          });
+        }
+        console.log('added to end')  
+        break;
+    }
+    console.log(visibleItems.reduce((prev, item) => {
+      prev.push(item.ref);
+      return prev;
+    }, []));
+    this.setState({visibleItems: visibleItems});
+  }
+
+  getStartElChanges(posData) {
+    if (posData.distanceAboveTop > 400) {
+      return { action: 'remove', height: posData.height };
+    } else if (posData.distanceAboveTop <= 300) {
+      return { action: 'add' };
+    } else {
+      return {action: 'none'}
+    }
+  }
+
+  getEndElChanges(posData) {
+    if (posData.distanceBelowBottom > 400) {
+      return { action: 'remove', height: posData.height };
+    } else if (posData.distanceBelowBottom <= 300 ) {
+      return { action: 'add' };
+    } else {
+      return { action: 'none' };
+    }
+  }
+
   getNode() {
     return React.findDOMNode(this);
   }
-
-  updateStatus(posData, listingsIndex) {
-    if (posData.distanceAboveTop > 300) {
-      this.removeListing('top');
-      return;
-    } else if (posData.distanceAboveTop < 300 && posData.distanceAboveTop > 0) {
-      this.addListing('top', listingsIndex);
-      return;
-    }
-
-    if (posData.distanceBelowBottom > 300) {
-      this.removeListing('bottom');
-      return;
-    } else if (posData.distanceBelowBottom < 300 && posData.distanceBelowBottom > 0) {
-      this.addListing('bottom', listingsIndex);
-    }
-  }
-
-  removeListing(side) {
-    // removes appropriate element from beginning or end of visible array;
-    switch(side) {
-      case 'top':
-        var visibleItems = this.state.visibleItems;
-        visibleItems = visibleItems.slice(1, visibleItems.length - 1);
-        this.setState({visibleItems: visibleItems});
-        break;
-      case 'bottom':
-        var visibleItems = this.state.visibleItems;
-        var length = visibleItems.length;
-        visibleItems = visibleItems.slice(0, length - 1);
-        this.setState({visibleItems: visibleItems});
-        break;
-    }
-  }
-
-  addListing(side, listingsIndex) {
-    // adds appropriate element from listings array to beginning or end of visible array;
-    switch(side) {
-      case 'top':
-        var indexMinusOne = listingsIndex - 1;
-        if (indexMinusOne < 0) {return;}
-        var visibleItems = this.state.visibleItems;
-
-        visibleItems.unshift({
-          listing: this.props.listings[indexMinusOne],
-          index: indexMinusOne
-        });
-
-        this.setState({visibleItems: visibleItems});
-        break;
-      case 'bottom':
-        if (listingsIndex + 1 > this.props.listings.length) {return;}
-        var visibleItems = this.state.visibleItems;
-
-        visibleItems.push({
-          listing: this.props.listings[listingsIndex + 1],
-          index: listingsIndex + 1
-        }); 
-
-        this.setState({visibleItems: visibleItems});
-        break;
-    }
-  } 
 
   render() {
     var props = this.props;
     var page = props.firstPage || 0;
     var length = props.listings.length;
     var { compact, visibleItems, loadingDone }  = this.state;
+    var before = true;
+    var after = false;
+
     var listings = (
       visibleItems.map((item, i) => {
         var listing = item.listing;
-        var listingsIndex = item.index;
+
+        if (item.ref === 'start') {before = false}
+        if (before || after) {return <div style={{height: item.height}}></div>}
+        if (item.ref === 'end') {after = true}
+
 
         var index = (page * 25) + i;
         if (listing._type === 'Comment') {
@@ -276,15 +329,10 @@ class ListingList extends BaseComponent {
           if (props.showHidden || !listing.hidden) {
             return (
               <Listing
-                loadingDone={ loadingDone }
-                isFirstOrLast={i === 0 || (i === visibleItems.length - 1 && loadingDone)}
-                updateStatus={this.updateStatus.bind(this)}
-                getScrollContainer={this.getNode.bind(this)}
+                ref={item.ref}
                 index={index}
-                listingsIndex={listingsIndex}
                 key={'page-listing-' + index}
                 listing={listing}
-                ref={'listing' + i}
                 z={length - i}
                 {...props}
                 compact={ compact }
@@ -301,14 +349,13 @@ class ListingList extends BaseComponent {
     // }
 
     return (
-      <div className='ListingList__scroll-wrap' ref='root' onScroll={this.listingsWrapScroll}>
+      <div
+        className='ListingList__scroll-wrap'
+        ref='root'
+        onScroll={this.listingsWrapScroll}>
         { listings }
       </div>
     );
-  }
-
-  listingsWrapScroll(e) {
-    globals().app.emit("infinite:scroll", e);
   }
 
   _onCompactToggle() {

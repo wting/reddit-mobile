@@ -43,9 +43,10 @@ function checkVisibility(el, container) {
 
   var distanceAboveTop = -(rect.bottom - containmentRect.top);
   var distanceBelowBottom = rect.top - containmentRect.bottom;
+  var height = rect.height;
 
 
-  return { partialVisible, distanceBelowBottom, distanceAboveTop };
+  return { partialVisible, distanceBelowBottom, distanceAboveTop, height};
 
 }
 

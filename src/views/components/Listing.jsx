@@ -4,7 +4,6 @@ import globals from '../../globals';
 import mobilify from '../../lib/mobilify';
 import propTypes from '../../propTypes';
 import short from '../../lib/formatDifference';
-import checkVisibility from '../../lib/checkVisibility';
 
 import AutoTween from '../components/AutoTween';
 import BaseComponent from './BaseComponent';
@@ -265,15 +264,16 @@ class Listing extends BaseComponent {
       }
       var expandedCompact = (
         <AutoTween key = { this.key }>
-          <ListingContent expand = { this.expand }
-                          expanded = { true }
-                          width={ state.width }
-                          tallestHeight={ state.tallestHeight }
-                          loaded={ state.loaded }
-                          { ...props }
-                          expandedCompact={ true }
-                          compact={ compact }
-                          />
+          <ListingContent 
+            expand = { this.expand }
+            expanded = { true }
+            width={ state.width }
+            tallestHeight={ state.tallestHeight }
+            loaded={ state.loaded }
+            { ...props }
+            expandedCompact={ true }
+            compact={ compact }
+          />
         </AutoTween>
       );
     }
@@ -283,19 +283,19 @@ class Listing extends BaseComponent {
         <div className='Listing-content-holder'>
           { this._renderHeadline() }
           <ListingContent
-                          isThumbnail={compact}
-                          expand = { this.expand }
-                          expanded = { state.expanded && !expandedCompact }
-                          width={ state.width }
-                          tallestHeight={ state.tallestHeight }
-                          loaded={ state.loaded }
-                          editing={this.props.editing}
-                          toggleEdit={this.props.toggleEdit}
-                          saveUpdatedText={this.props.saveUpdatedText}
-                          editError={ this.props.editError }
-                          { ...props }
-                          compact={ compact }
-                          />
+            isThumbnail={compact}
+            expand = { this.expand }
+            expanded = { state.expanded && !expandedCompact }
+            width={ state.width }
+            tallestHeight={ state.tallestHeight }
+            loaded={ state.loaded }
+            editing={this.props.editing}
+            toggleEdit={this.props.toggleEdit}
+            saveUpdatedText={this.props.saveUpdatedText}
+            editError={ this.props.editError }
+            { ...props }
+            compact={ compact }
+            />
           { this._renderFooter() }
         </div>
         <TransitionGroup>
@@ -311,46 +311,12 @@ class Listing extends BaseComponent {
       globals().app.on(constants.RESIZE, this.resize);
       this.resize();
     }
-
-    if (this.props.isFirstOrLast) {
-      globals().app.on('infinite:scroll', this.handleParentScroll.bind(this))  
-    }
-
-    if (!this.props.loadingDone) {
-      var el = React.findDOMNode(this);
-      var visible = checkVisibility(el, this.props.getScrollContainer());
-      globals().app.emit('infinite:loadOneMore', visible.distanceBelowBottom > 200);      
-    }
-
-  }
-
-  componentDidUpdate() {
-    if (this.props.isFirstOrLast) {
-      globals().app.on('infinite:scroll', this.handleParentScroll.bind(this));      
-    } else {
-      globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));      
-    }
-  }
-
-  handleParentScroll(e) {
-    var el = React.findDOMNode(this);
-    var posData = checkVisibility(el, this.props.getScrollContainer());
-    // update visible status if necessary)
-
-    if (posData.distanceAboveTop > 300 || posData.distanceBelowBottom > 300) {
-      globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));
-    }
-
-    this.props.updateStatus(posData, this.props.listingsIndex);  
-    
   }
 
   componentWillUnmount() {
     if (this.props.single) {
       globals().app.off(constants.RESIZE, this.resize);
     }
-    var scrollContainer = this.props.getScrollContainer();
-    globals().app.off('infinite:scroll', this.handleParentScroll.bind(this));
   }
 
   checkPos(winHeight) {
