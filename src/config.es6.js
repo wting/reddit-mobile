@@ -1,5 +1,19 @@
 // This configuration is shared with the client. Any hidden, server-only config
 // belongs in ./server instead.
+import crypto from 'crypto'
+
+let globalMessage = null;
+// {
+//   frontPageOnly: true,
+//   html: '<p>hello world</p>',
+//   expires: 'Nov 20, 2015'
+// };
+
+if (globalMessage) {
+  const sha = crypto.createHash('sha1');
+  sha.update(globalMessage.html);
+  globalMessage.key = sha.digest('hex');
+}
 
 function config() {
   return {
@@ -34,13 +48,7 @@ function config() {
     trackerClientName: process.env.TRACKER_CLIENT_NAME,
 
     // hack for now for global messages displayed with the infobar component.
-    GlobalMessage: null,
-    // example message
-    // {
-    //   frontPageOnly: true, 
-    //   html: '<p>hello world</p>',
-    //   expires: 'Nov 20, 2015'
-    // },
+    GlobalMessage: globalMessage,
   };
 };
 
