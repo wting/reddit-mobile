@@ -1,5 +1,5 @@
 build:
-  image: node:$$NODE_VERSION
+  image: node:5
   environment:
     CXX: g++-4.8
   commands:
@@ -10,11 +10,6 @@ build:
     - npm run lint
     - npm run test
 
-matrix:
-  NODE_VERSION:
-    - 5
-    - 6
-
 publish:
   ecr:
     region: us-east-1
@@ -24,7 +19,7 @@ publish:
     file: Dockerfile.staging
 
 # These plugins are triggered after a build failure/success.
-#notify:
-#  slack:
-#    webhook_url: $$CI_SLACK_WEBHOOK_URL
-#    channel: ci-notifications
+notify:
+  slack:
+    webhook_url: $$CI_SLACK_WEBHOOK_URL
+    channel: ci-notifications
