@@ -20,6 +20,10 @@ sub vcl_recv {
       # Blacklisted endpoints
       # This endpoint 200's for mweb, but the current implementation has issues
       req.url !~ "^/message/compose/?$"
+      # We don't host json in mweb
+      || req.url !~ ".*\.json(\?.*|$)"
+      # We don't host XML / RSS in mweb
+      || req.url !~ "(?i).*\.(xml|rss)$"
     )
     && (
       # Whitelisted 2X endpoints from router/index.js
