@@ -35,19 +35,19 @@ const UserProfileTabs = props => {
   return (
     <nav className='UserProfileHeader__tabs'>
       <UserProfileTab
-        href={ `/user/${userName}` }
+        href={ UserActivityHandler.activityUrl(userName, null) }
         icon='icon-user-account'
         text='ABOUT'
         selected={ currentActivity === undefined }
       />
       <UserProfileTab
-        href={ UserActivityHandler.activityURL(userName, POSTS_ACTIVITY) }
+        href={ UserActivityHandler.activityUrl(userName, POSTS_ACTIVITY) }
         icon='icon-posts'
         text='POSTS'
         selected={ currentActivity === POSTS_ACTIVITY }
       />
       <UserProfileTab
-        href={ UserActivityHandler.activityURL(userName, COMMENTS_ACTIVITY) }
+        href={ UserActivityHandler.activityUrl(userName, COMMENTS_ACTIVITY) }
         icon='icon-comment'
         text='COMMENTS'
         selected={ currentActivity === COMMENTS_ACTIVITY }

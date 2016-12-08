@@ -13,6 +13,7 @@ import SetOver18Handler from './handlers/SetOver18';
 import SubredditAboutPageHandler from './handlers/SubredditAboutPage';
 import ToggleSubredditSubscriptionHandler from './handlers/ToggleSubredditSubscription';
 import UserActivityHandler from './handlers/UserActivity';
+import UserActivityRerouteHandler from './handlers/UserActivityReroute';
 import UserProfilerHandler from './handlers/UserProfile';
 import DirectMessage from './handlers/DirectMessage';
 import Messages from './handlers/Messages';
@@ -41,9 +42,10 @@ export default [
   ['/comments/:postId/:postTitle/:commentId', CommentsPageHandler, { name: 'comments' }],
   ['/comments/:postId/:postTitle?', CommentsPageHandler, { name: 'comments' }],
   ['/comments', CommentsPageHandler],
-  ['/user/:userName/activity', UserActivityHandler],
+  ['/user/:userName/activity', UserActivityRerouteHandler],
   ['/user/:userName/gild', UserProfilerHandler],
   ['/user/:userName/:savedOrHidden(saved|hidden)', SavedAndHiddenHandler],
+  ['/user/:userName/:commentsOrSubmitted(comments|submitted)', UserActivityHandler],
   ['/user/:userName', UserProfilerHandler, { name: 'user' }],
   ['/live/*', LiveRedirectHandler ],
   ['/login', Login],

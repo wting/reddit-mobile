@@ -2,15 +2,20 @@ import { BaseHandler, METHODS } from '@r/platform/router';
 
 import { cleanObject } from 'lib/cleanObject';
 import { SORTS } from 'app/sortValues';
-import { POSTS_ACTIVITY } from 'app/actions/activities';
+import { COMMENTS_ACTIVITY, POSTS_ACTIVITY } from 'app/actions/activities';
 import * as activitiesActions from 'app/actions/activities';
 import { fetchUserBasedData } from './handlerCommon';
 import { listingTime } from 'lib/listingTime';
-import { urlWith } from 'lib/urlWith';
 
 export default class UserActivityHandler extends BaseHandler {
-  static activityURL(userName, activity) {
-    return urlWith(`/user/${userName}/activity`, { activity });
+  static activityUrl(userName, activity) {
+    if (activity === COMMENTS_ACTIVITY) {
+      return `/user/${userName}/comments`;
+    } else if (activity === POSTS_ACTIVITY) {
+      return `/user/${userName}/submitted`;
+    }
+
+    return `/user/${userName}`;
   }
 
   static pageParamsToActivitiesParams({ urlParams, queryParams }) {
@@ -29,12 +34,16 @@ export default class UserActivityHandler extends BaseHandler {
   }
 
   async [METHODS.GET](dispatch, getState) {
-    const state = getState();
-    if (state.platform.shell) { return; }
+    if (getState().platform.shell) {
+      return;
+    }
 
+    const { platform: { currentPage }} = getState();
+    const { urlParams } = currentPage;
+    this.queryParams.activity = urlParams.commentsOrSubmitted;
     const activitiesParams = UserActivityHandler.pageParamsToActivitiesParams(this);
-    dispatch(activitiesActions.fetch(activitiesParams));
 
+    dispatch(activitiesActions.fetch(activitiesParams));
     fetchUserBasedData(dispatch);
   }
 }
