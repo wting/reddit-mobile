@@ -9,12 +9,14 @@ import * as sessionActions from 'app/actions/session';
 
 import goBackDest from 'lib/goBackDest';
 
-import { themes } from 'app/constants';
+import { COLOR_SCHEME } from 'app/constants';
 import LoginInput from 'app/components/LoginRegistrationForm/Input';
 import ReCaptcha from 'app/components/ReCaptcha';
 import SnooIcon from 'app/components/SnooIcon';
 import SquareButton from 'app/components/LoginRegistrationForm/SquareButton';
 import 'app/components/LoginRegistrationForm/styles.less';
+
+const { DAYMODE } = COLOR_SCHEME;
 
 const CAPTCHA_ERRORS = {
   BAD_CAPTCHA: 'Please provide a valid captcha',
@@ -161,7 +163,7 @@ class Register extends React.Component {
     const passwordFieldType = isPasswordField ? 'password' : 'text';
     const backDest = goBackDest(platform, ['/login', '/register']);
     const { recaptchaSitekey } = config;
-    const captchaTheme = (theme === themes.DAYMODE) ? 'light' : 'dark';
+    const captchaTheme = (theme === DAYMODE) ? 'light' : 'dark';
 
     return (
       <div className='Register'>

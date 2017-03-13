@@ -57,7 +57,6 @@ export default function(state=DEFAULT, action={}) {
     }
 
     case xpromoActions.PROMO_CLICKED: {
-      markBannerClosed();
       return merge(state, {
         showBanner: false,
       });

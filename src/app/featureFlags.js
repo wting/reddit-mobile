@@ -22,7 +22,7 @@ import isFakeSubreddit from 'lib/isFakeSubreddit';
 
 const {
   BETA,
-  SMARTBANNER,
+  XPROMOBANNER,
   USE_BRANCH,
   // Recommended Content experiments
   VARIANT_NEXTCONTENT_BOTTOM,
@@ -64,11 +64,14 @@ const {
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_ANDROID,
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS_CONTROL,
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_ANDROID_CONTROL,
+  // Persistent Xpromo
+  VARIANT_XPROMO_PERSISTENT_IOS,
+  VARIANT_XPROMO_PERSISTENT_ANDROID,
 } = flagConstants;
 
 const config = {
   [BETA]: true,
-  [SMARTBANNER]: {
+  [XPROMOBANNER]: {
     and: [
       { allowedPages: ['index', 'listing'] },
       { allowNSFW: false },
@@ -253,6 +256,36 @@ const config = {
       { or: [
         { variant: 'mweb_xpromo_interstitial_frequency_android:control_1' },
         { variant: 'mweb_xpromo_interstitial_frequency_android:control_2' },
+      ] },
+    ],
+  },
+  [VARIANT_XPROMO_PERSISTENT_IOS]: {
+    and: [
+      { allowedDevices: [IPHONE] },
+      { allowedPages: ['index', 'listing', 'comments'] },
+      { allowNSFW: false },
+      { not: { or: [
+        { peak: 'mweb_xpromo_modal_listing_click_ios' },
+        { peak: 'mweb_xpromo_require_login_ios' },
+      ]}},
+      { or: [
+        { url: 'xpromopersistent' },
+        { variant: 'mweb_xpromo_persistent_ios:treatment' },
+      ] },
+    ],
+  },
+  [VARIANT_XPROMO_PERSISTENT_ANDROID]: {
+    and: [
+      { allowedDevices: [ANDROID] },
+      { allowedPages: ['index', 'listing', 'comments'] },
+      { allowNSFW: false },
+      { not: { or: [
+        { peak: 'mweb_xpromo_modal_listing_click_android' },
+        { peak: 'mweb_xpromo_require_login_android' },
+      ]}},
+      { or: [
+        { url: 'xpromopersistent' },
+        { variant: 'mweb_xpromo_persistent_android:treatment' },
       ] },
     ],
   },
@@ -449,6 +482,17 @@ flags.addRule('isMod', function(val) {
     userIsMod = names.includes(subreddit.toLowerCase());
   }
   return userIsMod === val;
+});
+
+flags.addRule('peak', function(experimentName) {
+  const experimentData = getExperimentData(this.state, experimentName);
+  if (!experimentData) {
+    return false;
+  }
+
+  const { variant } = experimentData;
+  const result = (variant && variant !== 'control_1' && variant !== 'control_2');
+  return result;
 });
 
 const firstBuckets = new Set();

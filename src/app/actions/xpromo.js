@@ -5,6 +5,7 @@ import {
   markListingClickTimestampLocalStorage,
   shouldNotShowBanner,
   listingClickInitialState as getListingClickInitialState,
+  isXPromoPersistentEnabled,
 } from 'lib/xpromoState';
 import {
   trackPreferenceEvent,
@@ -15,10 +16,8 @@ import {
 
 export const SHOW = 'XPROMO__SHOW';
 export const show = () => ({ type: SHOW });
-
 export const HIDE = 'XPROMO__HIDE';
 export const hide = () => ({ type: HIDE });
-
 export const PROMO_CLICKED = 'XPROMO__PROMO_CLICKED';
 export const promoClicked = () => ({ type: PROMO_CLICKED });
 
@@ -28,6 +27,25 @@ export const PROMO_SCROLLPAST = 'XPROMO__SCROLLPAST';
 export const promoScrollPast = () => ({ type: PROMO_SCROLLPAST });
 export const PROMO_SCROLLUP = 'XPROMO__SCROLLUP';
 export const promoScrollUp = () => ({ type: PROMO_SCROLLUP });
+
+export const XPROMO_PERSIST_DEACTIVE = 'XPROMO__PERSIST_DEACTIVE';
+export const promoPersistDeactivate = () => ({ type: XPROMO_PERSIST_DEACTIVE });
+export const XPROMO_PERSIST_ACTIVE = 'XPROMO__PERSIST_ACTIVE';
+export const promoPersistActivate = () => async (dispatch) => {
+  dispatch({ type: XPROMO_PERSIST_ACTIVE });
+  dispatch(show());
+};
+
+export const XPROMO_DISMISS_CLICKED = 'XPROMO__DISMISS_CLICKED';
+export const promoDismissed = (dismissType) => async (dispatch, getState) => {
+  dispatch({ type: XPROMO_DISMISS_CLICKED });
+  if (dismissType) {
+    dispatch(trackXPromoEvent(XPROMO_DISMISS, { dismiss_type: dismissType }));
+  }
+  if (isXPromoPersistentEnabled(getState())) {
+    dispatch(promoPersistActivate());
+  }
+};
 
 export const LISTING_CLICK_INITIAL_STATE = 'XPROMO__LISTING_CLICK_INITIAL_STATE';
 export const listingClickInitialState = ({ ineligibilityReason='', lastModalClick=0 }) => ({
@@ -79,28 +97,29 @@ export const loginRequired = () => ({ type: LOGIN_REQUIRED });
 
 const EXTERNAL_PREF_NAME = 'hide_mweb_xpromo_banner';
 
-// element is the interface element through which the user dismissed the
-// crosspromo experience.
+// element is the interface element through which
+// the user dismissed the crosspromo experience.
 export const close = () => async (dispatch, getState) => {
   markBannerClosed();
   dispatch(hide());
-
-  // We use a separate externally-visible name/value for the preference for
-  // clarity when analyzing these events in our data pipeline.
+  // We use a separate externally-visible name/value
+  // for the preference for clarity when analyzing
+  // these events in our data pipeline.
   trackPreferenceEvent(getState(), {
     modified_preferences: [EXTERNAL_PREF_NAME],
     user_preferences: {
       [EXTERNAL_PREF_NAME]: true,
     },
   });
-
 };
 
 export const checkAndSet = () => async (dispatch, getState) => {
   if (!shouldNotShowBanner(getState())) {
     dispatch(show());
   }
-
+  if (isXPromoPersistentEnabled(getState())) {
+    dispatch(promoPersistActivate());
+  }
   dispatch(listingClickInitialState(getListingClickInitialState()));
 };
 

@@ -9,22 +9,30 @@ import {
   xPromoExtraScreenViewData,
 } from 'lib/eventUtils';
 
-import { LISTING_CLICK_TYPES } from 'app/constants';
-
 import {
   getXPromoExperimentPayload,
-  getFrequencyExperimentData,
   isEligibleCommentsPage,
   isEligibleListingPage,
   loginRequiredEnabled,
+  getExperimentRange,
+  isXPromoPersistent,
 } from 'app/selectors/xpromo';
 
 import {
+  LISTING_CLICK_TYPES,
   EXPERIMENT_FREQUENCY_VARIANTS as FREQUENCIES,
   EVERY_TWO_WEEKS,
   LOCAL_STORAGE_KEYS,
   XPROMO_MODAL_LISTING_CLICK_NAME,
+  XPROMO_DISPLAY_THEMES,
 } from 'app/constants';
+
+const {
+  USUAL,
+  LOGIN,
+  MINIMAL,
+  PERSIST,
+} = XPROMO_DISPLAY_THEMES;
 
 const {
   BANNER_LAST_CLOSED,
@@ -47,6 +55,10 @@ function getLoidValues(accounts) {
     loid,
     loidCreated,
   };
+}
+
+export function isXPromoPersistentEnabled(state) {
+  return isXPromoPersistent(state);
 }
 
 export function getXPromoLinkforCurrentPage(state, linkType) {
@@ -132,19 +144,22 @@ export function getXPromoLink(state, path, linkType, additionalData={}) {
   });
 }
 
-function getClosingTimeRange(state) {
-  const defaultRange = FREQUENCIES[EVERY_TWO_WEEKS];
-  const experimentData = getFrequencyExperimentData(state);
-  if (experimentData) {
-    return (FREQUENCIES[experimentData.variant] || defaultRange);
-  }
-  return defaultRange;
+function getXpromoClosingTime(state, localStorageKey=BANNER_LAST_CLOSED) {
+  const lastClosedStr = localStorage.getItem(localStorageKey);
+  return (lastClosedStr ? new Date(lastClosedStr).getTime() : 0);
 }
- 
-function getLastClosedLimitUTS(state) {
-  const lastClosedStr = localStorage.getItem(BANNER_LAST_CLOSED);
-  const lastClosedDate = (lastClosedStr ? new Date(lastClosedStr).getTime() : 0);
-  return lastClosedDate + getClosingTimeRange(state);
+
+function getXpromoClosingRange(state, presetRange) {
+  return FREQUENCIES[(presetRange || getExperimentRange(state) || EVERY_TWO_WEEKS)];
+}
+
+function getXpromoClosingLimit(state) {
+  return getXpromoClosingTime(state)+getXpromoClosingRange(state);
+}
+
+export function isInterstitialDimissed(state) {
+  const defaultRange = getXpromoClosingTime(state)+getXpromoClosingRange(state, EVERY_TWO_WEEKS);
+  return (defaultRange > Date.now());
 }
 
 export function getBranchLink(state, path, payload={}) {
@@ -204,7 +219,7 @@ export function shouldNotShowBanner(state) {
   }
   // Do not show the banner:
   // If closing date is in limit range still
-  if (getLastClosedLimitUTS(state) > Date.now()) {
+  if (getXpromoClosingLimit(state) > Date.now()) {
     return 'dismissed_previously';
   }
   // Show the banner
@@ -215,7 +230,6 @@ export function listingClickInitialState() {
   // Check if there's been a listing click in the last two weeks
   const lastClickedStr = localStorage.getItem(XPROMO_LAST_MODAL_CLICK);
   const lastModalClick = lastClickedStr ? new Date(lastClickedStr).getTime() : 0;
-
   return {
     ineligibilityReason: localStorageAvailable() ? null : 'local_storage_unavailable',
     lastModalClick,
@@ -235,20 +249,18 @@ export const markListingClickTimestampLocalStorage = (dateTime) => {
   localStorage.setItem(XPROMO_LAST_MODAL_CLICK, dateTime);
 };
 
-
 function interstitialType(state) {
   if (isEligibleListingPage(state)) {
     if (state.xpromo.listingClick.active) {
       return XPROMO_MODAL_LISTING_CLICK_NAME;
+    } else if (isXPromoPersistentEnabled(state)) {
+      return PERSIST;
+    } else if (loginRequiredEnabled(state)) {
+      return LOGIN;
     }
-
-    if (loginRequiredEnabled(state)) {
-      return 'require_login';
-    }
-
-    return 'transparent';
+    return USUAL;
   } else if (isEligibleCommentsPage(state)) {
-    return 'black_banner_fixed_bottom';
+    return MINIMAL;
   }
 }
 

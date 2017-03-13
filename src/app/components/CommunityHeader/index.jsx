@@ -4,13 +4,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { themes } from 'app/constants';
+import { COLOR_SCHEME } from 'app/constants';
 import { formatNumber } from 'lib/formatNumber';
 
 import Loading from 'app/components/Loading';
 import SubredditSubscribeForm from 'app/components/SubredditSubscribeForm';
 
-const { NIGHTMODE } = themes;
+const { NIGHTMODE } = COLOR_SCHEME;
 const UTF8Circle = '●';
 
 const renderErrorMessage = error => {

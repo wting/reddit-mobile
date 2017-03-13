@@ -7,13 +7,15 @@ import { createSelector } from 'reselect';
 import { Anchor } from 'platform/components';
 import NSFWFlair from 'app/components/NSFWFlair';
 import SubredditSubscribeForm from 'app/components/SubredditSubscribeForm';
-import { themes } from 'app/constants';
+import { COLOR_SCHEME } from 'app/constants';
 import { formatNumber } from 'lib/formatNumber';
+
+const { NIGHTMODE } = COLOR_SCHEME;
 
 const renderIcon = (iconUrl, url, color, theme) => {
   let style;
   if (color) {
-    if (theme === themes.NIGHTMODE && !iconUrl) {
+    if (theme === NIGHTMODE && !iconUrl) {
       style = { borderColor: color };
     } else {
       style = { backgroundColor: color };
