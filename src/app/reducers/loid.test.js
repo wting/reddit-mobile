@@ -97,5 +97,50 @@ createTest({ reducers: { loid } }, ({ getStore, expect }) => {
         expect(loidCreated).to.equal(CREATED);
       });
     });
+
+    describe('SET_EDGE_BUCKET', () => {
+      it('should update the edgebucket cookie', () => {
+        const LOID = 'EbxVm9pOhRDdk0Ck7S';
+        const CREATED = '2016-05-27T05:05:49.012Z';
+        const EDGEBUCKET = 'foo';
+
+        const { store } = getStore();
+        store.dispatch(loidActions.setLOID({
+          loid: LOID,
+          loidCookie: LOID,
+          loidCreated: CREATED,
+          loidCreatedCookie: CREATED,
+        }));
+
+        store.dispatch(loidActions.setEdgeBucket({
+          edgeBucket: EDGEBUCKET,
+        }));
+
+        const { loid: { loid, loidCreated, edgeBucket } } = store.getState();
+        expect(loid).to.equal(LOID);
+        expect(loidCreated).to.equal(CREATED);
+        expect(edgeBucket).to.equal(EDGEBUCKET);
+      });
+
+      it('should be a noop when there is no edgebucket value', () => {
+        const LOID = 'EbxVm9pOhRDdk0Ck7S';
+        const CREATED = '2016-05-27T05:05:49.012Z';
+
+        const { store } = getStore();
+        store.dispatch(loidActions.setLOID({
+          loid: LOID,
+          loidCookie: LOID,
+          loidCreated: CREATED,
+          loidCreatedCookie: CREATED,
+        }));
+
+        store.dispatch(loidActions.setEdgeBucket({}));
+
+        const { loid: { loid, loidCreated, edgeBucket } } = store.getState();
+        expect(loid).to.equal(LOID);
+        expect(loidCreated).to.equal(CREATED);
+        expect(edgeBucket).to.equal('');
+      });
+    });
   });
 });
