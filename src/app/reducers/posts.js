@@ -67,6 +67,11 @@ export default function(state=DEFAULT, action={}) {
       return mergeUpdatedModel(state, action, { restrictType: POST });
     }
 
+    case postActions.UPDATE_VIDEO_TIME: {
+      const { post } = action;
+      return mergeAPIModels(state, { [post.uuid]: post });
+    }
+
     case modToolActions.MODTOOLS_APPROVAL_SUCCESS: {
       const { thing, username } = action;
 

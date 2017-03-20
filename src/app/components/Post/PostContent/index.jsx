@@ -12,6 +12,8 @@ import OutboundLink from 'app/components/OutboundLink';
 
 import { LISTING_CLICK_TYPES } from 'app/constants';
 
+import HTML5StreamPlayer from 'app/components/HTML5StreamPlayer';
+
 import {
   isPostNSFW,
   cleanPostDomain,
@@ -54,6 +56,7 @@ PostContent.propTypes = {
   editPending: T.bool,
   onToggleEdit: T.func.isRequired,
   onUpdateSelftext: T.func.isRequired,
+  onUpdatePostPlaytime: T.func.isRequired,
   forceHTTPS: T.bool.isRequired,
   isDomainExternal: T.bool.isRequired,
   renderMediaFullbleed: T.bool.isRequired,
@@ -215,6 +218,9 @@ function buildMediaContent(post, linkDescriptor, props) {
       }
 
       e.preventDefault();
+      if (isNSFW || isSpoiler) {
+        props.toggleShowNSFW();
+      }
       togglePlaying();
     };
     return buildImagePreview(previewImage, sourceURL, linkDescriptor,
@@ -242,25 +248,45 @@ function buildMediaContent(post, linkDescriptor, props) {
 
 function buildImagePreview(previewImage, imageURL, linkDescriptor, callback,
                            needsObfuscating, playableType, props) {
-  const html5sources = gifToHTML5Sources(imageURL, previewImage.url);
-  const { single, isPlaying } = props;
 
-  if (isPlaying && html5sources) {
-    const { width, height } = previewImage;
-    const aspectRatio = getAspectRatio(single, width, height);
+  const { single, isPlaying, post } = props;
 
-    if (html5sources.iframe) {
-      return renderIframe(html5sources.iframe, aspectRatio);
+  if (isPlaying || !needsObfuscating) {
+    //locally hosted video
+    if (post.media && post.media.reddit_video) {
+      const { width, height } = previewImage;
+      const aspectRatio = getAspectRatio(single, width, height);
+
+      const generatedSrc = {
+        dash: post.media.reddit_video.dash_url,
+        hls: post.media.reddit_video.hls_url,
+        scrubberThumbSource: post.media.reddit_video.scrubber_media_url,
+        isGif: post.media.reddit_video.is_gif,
+        width: previewImage.width,
+        height: previewImage.height,
+      };
+
+      return renderVideo(generatedSrc, previewImage, aspectRatio, props);
     }
 
-    const generatedSrc = {
-      webm: html5sources.webm,
-      mp4: html5sources.mp4,
-      width: previewImage.width,
-      height: previewImage.height,
-    };
+    const html5sources = gifToHTML5Sources(imageURL, previewImage.url);
+    if (html5sources) {
+      const { width, height } = previewImage;
+      const aspectRatio = getAspectRatio(single, width, height);
 
-    return renderVideo(generatedSrc, html5sources.poster, aspectRatio);
+      if (html5sources.iframe) {
+        return renderIframe(html5sources.iframe, aspectRatio);
+      }
+
+      const generatedSrc = {
+        webm: html5sources.webm,
+        mp4: html5sources.mp4,
+        width: previewImage.width,
+        height: previewImage.height,
+      };
+
+      return renderVideo(generatedSrc, html5sources.poster, aspectRatio, props);
+    }
   }
 
   return renderImage(previewImage, imageURL, linkDescriptor, callback,
@@ -393,7 +419,31 @@ function renderIframe(src, aspectRatio) {
   );
 }
 
-function renderVideo(videoSpec, posterImage, aspectRatio) {
+function renderVideo(videoSpec, posterImage, aspectRatio, props) {
+  const { post, onUpdatePostPlaytime } = props;
+
+  if (videoSpec.hls || videoSpec.dash) {
+    //video limited to 16:9 as specced, will be letterboxed if different reservation.
+    let aspectRatio;
+    if ((videoSpec.width / videoSpec.height) < (16 / 9)) {
+      aspectRatio = getAspectRatio(false, 16, 9);
+    } else {
+      aspectRatio = getAspectRatio(false, videoSpec.width, videoSpec.height);
+    }
+
+    return (
+      <HTML5StreamPlayer
+        postData = { post }
+        onUpdatePostPlaytime = { onUpdatePostPlaytime }
+        aspectRatioClassname = { aspectRatioClass(aspectRatio) }
+        hlsSource = { videoSpec.hls }
+        mpegDashSource = { videoSpec.dash }
+        isGif = { videoSpec.isGif }
+        scrubberThumbSource = { videoSpec.scrubberThumbSource }
+      />
+    );
+  }
+
   return (
     <div className={ `PostContent__video-wrapper ${aspectRatioClass(aspectRatio)}` } >
       <video
@@ -506,6 +556,7 @@ function renderWarning(isThumbnail, post) {
 }
 
 function useOurOwnPlayingOrPreviewing(oembed, url, isPlaying) {
+  
   if (!isPlaying || !oembed) {
     return true;
   }
@@ -557,6 +608,11 @@ const PLAYABLE_TYPE = {
 
 function postToPlayableType(post) {
   const media = post.media;
+
+  if (media && (Object.keys(media)[0].localeCompare('reddit_video') === 0)) {
+    return PLAYABLE_TYPE.INLINE;
+  }
+
   if (media && media.oembed) {
     const type = media.oembed.type;
     if (type === 'gallery') {

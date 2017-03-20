@@ -106,6 +106,18 @@ export const toggleHidePost = postId => async (dispatch, getState) => {
   }
 };
 
+export const updatePostPlaytime = (postId, newPlaytime) => async (dispatch, getState) => {
+  const state = getState();
+  const post = state.posts[postId];
+  
+  try {
+    const newPost = PostModel.fromJSON({ ...post.toJSON(), videoPlaytime: newPlaytime });
+    dispatch(updatePlaying(newPost));
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const TOGGLE_EDIT = 'POSTS__TOGGLE_EDIT';
 export const toggleEdit = postId => ({
   type: TOGGLE_EDIT,
@@ -122,6 +134,13 @@ export const STOP_PLAYING = 'POSTS__STOP_PLAYING';
 export const stopPlaying = postId => ({
   type: STOP_PLAYING,
   thingId: postId,
+});
+
+//Video time must be kept current so that reports can be generated with video time
+export const UPDATE_VIDEO_TIME = 'POSTS__UPDATE_VIDEO_TIME';
+export const updatePlaying = (post) => ({
+  type: UPDATE_VIDEO_TIME,
+  post: post,
 });
 
 export const UPDATING_SELF_TEXT = 'POSTS__UPDATING_SELF_TEXT';

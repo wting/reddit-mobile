@@ -23,7 +23,7 @@ export const report = thingId => async (dispatch, getState) => {
   const thing = modelFromThingId(thingId, state); 
   const thingType = ModelTypes.thingType(thingId);
   const usesSubredditRules = SubredditRule.doRulesApplyToThingType(thingType);
-  
+
   const props = {
     thingId,
     thingType,
@@ -31,6 +31,11 @@ export const report = thingId => async (dispatch, getState) => {
 
   if (usesSubredditRules) {
     props.subredditName = thing.subreddit;
+  }
+
+  //If video playtime exists (video was playing when report generated) submit it with the report
+  if (thing.videoPlaytime) {
+    props.videoPlaytime = thing.videoPlaytime;
   }
 
   dispatch({
@@ -68,11 +73,15 @@ export const submit = report => async (dispatch, getState) => {
   const username = state.user.name;
 
   try {
+    const model = modelFromThingId(report.thingId, state);
+    report.reportTime = model.videoPlaytime;
+
     const body = {
       // 'reason' is either the shortname of a rule, or a special keyword
       // The naming in the api is... it could be better.
       reason: report.ruleName,
       thing_id: report.thingId,
+      report_time: report.reportTime,
       api_type: 'json',
     };
 
@@ -90,7 +99,6 @@ export const submit = report => async (dispatch, getState) => {
       body,
     });
 
-    const model = modelFromThingId(report.thingId, state);
     let moderatesSub = false;
 
     if (state.moderatingSubreddits && includes(state.moderatingSubreddits.names, model.subreddit)) {

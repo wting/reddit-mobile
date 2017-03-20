@@ -79,6 +79,7 @@ export default class PostModel extends RedditModel {
     thirdPartyTracking2: T.string,
     thirdPartyTrackers: T.string,
     userReports: T.array,
+    videoPlaytime: T.number,
 
     // derived
     expandable: T.bool,

@@ -63,6 +63,7 @@ Post.propTypes = {
   z: T.number,
   onToggleSavePost: T.func,
   onToggleHidePost: T.func,
+  onUpdatePostPlaytime: T.func,
   onReportPost: T.func.isRequired,
   onToggleModal: T.func.isRequired,
   onPostClick: T.func,
@@ -77,8 +78,10 @@ Post.defaultProps = {
   subredditShowSpoilers: false,
   showOver18Interstitial: false,
   winWidth: 360,
+  videoReportTime: null,
   onToggleSavePost: () => {},
   onToggleHidePost: () => {},
+  onUpdatePostPlaytime: () => {},
   onToggleModal: () => {},
   onPostClick: () => {},
 };
@@ -124,6 +127,7 @@ export function Post(props, context) {
     onToggleEdit,
     onToggleSavePost,
     onToggleHidePost,
+    onUpdatePostPlaytime,
     onStartPlaying,
     onStopPlaying,
     onReportPost,
@@ -191,6 +195,7 @@ export function Post(props, context) {
         renderMediaFullbleed={ renderMediaFullbleed }
         showLinksInNewTab={ showLinksInNewTab }
         interceptListingClick={ interceptListingClick }
+        onUpdatePostPlaytime={ onUpdatePostPlaytime }
       />
     );
   }
@@ -221,6 +226,7 @@ export function Post(props, context) {
         renderMediaFullbleed={ renderMediaFullbleed }
         showLinksInNewTab={ showLinksInNewTab }
         interceptListingClick={ interceptListingClick }
+        onUpdatePostPlaytime={ onUpdatePostPlaytime }
       />
     );
   }
@@ -333,6 +339,7 @@ const mapDispatchToProps = (dispatch, { postId }) => ({
   onUpdateSelftext: (newSelfText) => dispatch(postActions.updateSelfText(postId, newSelfText)),
   onToggleSavePost: () => dispatch(postActions.toggleSavePost(postId)),
   onToggleHidePost: () => dispatch(postActions.toggleHidePost(postId)),
+  onUpdatePostPlaytime: (newPlaytime) => dispatch(postActions.updatePostPlaytime(postId, newPlaytime)),
   onStopPlaying: () => dispatch(postActions.stopPlaying(postId)),
   onStartPlaying: () => dispatch(postActions.startPlaying(postId)),
   onReportPost: () => dispatch(reportingActions.report(postId)),
