@@ -65,9 +65,7 @@ export const UserActivityPage = connect(mapStateToProps)(props => {
       <PostAndCommentList
         requestLocation='activitiesRequests'
         requestId={ activitiesId }
-        thingProps={ {
-          userActivityPage: true,
-        } }
+        thingProps={ {userActivityPage: true} }
       />
     </div>
   );
