@@ -171,9 +171,10 @@ function anyFlagEnabled(state, flags) {
 }
 
 export function loginRequiredEnabled(state) {
-  if (!(shouldShowXPromo(state) && state.user.loggedOut)) {
+  if (!shouldShowXPromo(state)) {
     return false;
   }
+
   return anyFlagEnabled(state, LOGIN_REQUIRED_FLAGS);
 }
 

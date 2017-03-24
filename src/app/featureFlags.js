@@ -185,6 +185,7 @@ const config = {
   },
   [VARIANT_XPROMO_LOGIN_REQUIRED_IOS]: {
     and: [
+      { loggedin: false },
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing'] },
       { or: [
@@ -195,6 +196,7 @@ const config = {
   },
   [VARIANT_XPROMO_LOGIN_REQUIRED_IOS_CONTROL]: {
     and: [
+      { loggedin: false },
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing'] },
       { or: [
@@ -205,6 +207,7 @@ const config = {
   },
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID]: {
     and: [
+      { loggedin: false },
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing'] },
       { or: [
@@ -215,6 +218,7 @@ const config = {
   },
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID_CONTROL]: {
     and: [
+      { loggedin: false },
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing'] },
       { or: [
@@ -443,7 +447,11 @@ const SEO_REFERRERS = [
 ];
 
 flags.addRule('loggedin', function(val) {
-  return (!!this.state.user && !this.state.user.loggedOut) === val;
+  return (
+    !!this.state.user && 
+    !this.state.user.loggedOut && 
+    this.state.user.user_name
+  ) === val;
 });
 
 flags.addRule('users', function(users) {
