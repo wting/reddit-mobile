@@ -5,15 +5,10 @@ import { createStructuredSelector } from 'reselect';
 import * as xpromoActions from 'app/actions/xpromo';
 import { XPROMO_SCROLLPAST, XPROMO_SCROLLUP } from 'lib/eventUtils';
 import { xpromoThemeIsUsual, scrollPastState, scrollStartState } from 'app/selectors/xpromo';
-const T = React.PropTypes;
 
 class XPromoWrapper extends React.Component {
-  static propTypes = {
-    recordXPromoShown: T.func.isRequired,
-  };
-
   onScroll = () => {
-    // For now we will consider scrolling half the 
+    // For now we will consider scrolling half the
     // viewport "scrolling past" the interstitial.
     // note the referencing of window
     const { 
@@ -55,9 +50,6 @@ class XPromoWrapper extends React.Component {
   }
 
   componentDidMount() {
-    // Indicate that we've displayed a crosspromotional UI, 
-    // so we don't keep showing them during this browsing session.
-    this.props.recordXPromoShown();
     this.toggleOnScroll(true);
   }
 
@@ -85,12 +77,4 @@ const selector = createStructuredSelector({
   xpromoThemeIsUsual: state => xpromoThemeIsUsual(state),
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
-  ...stateProps,
-  ...dispatchProps,
-  recordXPromoShown: () =>
-    dispatchProps.dispatch(xpromoActions.recordShown(stateProps.currentUrl)),
-  ...ownProps,
-});
-
-export default connect(selector, undefined, mergeProps)(XPromoWrapper);
+export default connect(selector)(XPromoWrapper);
