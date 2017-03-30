@@ -4,15 +4,14 @@ import values from 'lodash/values';
 import url from 'url';
 
 import {
-  interstitialType,
-  isPartOfXPromoExperiment,
-  currentExperimentData as currentXPromoExperimentData,
-  listingClickExperimentData,
+  getXPromoExperimentPayload,
   xpromoIsEnabledOnDevice,
   commentsInterstitialEnabled,
   isEligibleListingPage,
   isEligibleCommentsPage,
 } from 'app/selectors/xpromo';
+
+import { interstitialData } from 'lib/xpromoState';
 
 import {
   buildAdditionalEventData as listingPageEventData,
@@ -172,6 +171,10 @@ export function trackXPromoEvent(state, eventType, additionalEventData) {
     ...buildSubredditData(state),
     ...getXPromoExperimentPayload(state),
     ...xPromoExtraScreenViewData(state),
+    // We should append the interstitialData, if this is not an XPROMO_INELIGIBLE
+    // event. In that case, we might not bucketed the user, so we should
+    // avoid trigger those events.
+    ...(eventType === XPROMO_INELIGIBLE ? {} : interstitialData(state)),
     ...additionalEventData,
   };
 
@@ -183,27 +186,9 @@ export function trackXPromoEvent(state, eventType, additionalEventData) {
   });
 }
 
-function getXPromoExperimentPayload(state) {
-  let experimentPayload = {};
-  if (state.xpromo.listingClick.showingListingClickInterstitial) {
-    // If we're showing a listing click interstitial, then we should using
-    const experimentData = listingClickExperimentData(state);
-    if (experimentData) {
-      const {experiment_name, variant } = experimentData;
-      experimentPayload = { experiment_name, experiment_variant: variant };
-    }
-  } else if (isPartOfXPromoExperiment(state) && currentXPromoExperimentData(state)) {
-    const { experiment_name, variant } = currentXPromoExperimentData(state);
-    experimentPayload = { experiment_name, experiment_variant: variant };
-  }
-  return experimentPayload;
-}
-
-
 export function trackXPromoView(state, additionalEventData) {
   trackXPromoEvent(state, XPROMO_VIEW, {
     ...additionalEventData,
-    interstitial_type: interstitialType(state),
   });
 }
 
