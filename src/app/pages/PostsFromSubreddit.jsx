@@ -8,6 +8,7 @@ import PostsList from 'app/components/PostsList';
 import NSFWInterstitial from 'app/components/NSFWInterstitial';
 import SortAndTimeSelector from 'app/components/SortAndTimeSelector';
 import SubNav from 'app/components/SubNav';
+import Tutorial from 'app/components/Tutorial';
 import XPromoListingClickModal from 'app/components/XPromoListingClickModal';
 
 import PostsFromSubredditHandler from 'app/router/handlers/PostsFromSubreddit';
@@ -21,7 +22,16 @@ const mapStateToProps = createSelector(
   state => state.subreddits,
   state => state.preferences,
   state => state.modal.id,
-  (pageProps, postsLists, subreddits, preferences, modalId) => {
+  (state, pageProps) => {
+    const postsListParams = PostsFromSubredditHandler.pageParamsToSubredditPostsParams(pageProps);
+    const isFrontPage = !postsListParams.subredditName;
+    const { loggedOut } = state.user;
+    const { subreddits: subscriptions } = state.subscribedSubreddits;
+    const hasSubs = subscriptions && subscriptions.length;
+
+    return isFrontPage && !loggedOut && !hasSubs;
+  },
+  (pageProps, postsLists, subreddits, preferences, modalId, shouldShowTutorial) => {
     const postsListParams = PostsFromSubredditHandler.pageParamsToSubredditPostsParams(pageProps);
     const postsListId = paramsToPostsListsId(postsListParams);
     const { subredditName } = postsListParams;
@@ -33,6 +43,7 @@ const mapStateToProps = createSelector(
       modalId,
       postsList: postsLists[postsListId],
       subreddit: subreddits[subredditName],
+      shouldShowTutorial,
     };
   },
 );
@@ -45,6 +56,7 @@ export const PostsFromSubredditPage = connect(mapStateToProps)(props => {
     subredditName,
     subreddit,
     preferences,
+    shouldShowTutorial,
   } = props;
 
   const showSubnav = !!postsList && !postsList.loading;
@@ -85,11 +97,14 @@ export const PostsFromSubredditPage = connect(mapStateToProps)(props => {
     <div className={ className }>
       { !forFakeSubreddit ? <CommunityHeader subredditName={ subredditName } /> : null }
       { showSubnav ? renderSubNav(subnavLink) : null }
-      <PostsList
-        postsListId={ postsListId }
-        subredditIsNSFW={ !!subreddit && subreddit.over18 }
-        subredditShowSpoilers={ !!subreddit && subreddit.spoilersEnabled }
-      />
+      { shouldShowTutorial
+        ? <Tutorial />
+        : <PostsList
+            postsListId={ postsListId }
+            subredditIsNSFW={ !!subreddit && subreddit.over18 }
+            subredditShowSpoilers={ !!subreddit && subreddit.spoilersEnabled }
+          />
+      }
       <XPromoListingClickModal />
     </div>
   );
