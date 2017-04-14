@@ -183,7 +183,7 @@ export function listingClickEnabled(state, postId) {
   }
   if (!state.user.loggedOut) {
     const userAccount = state.accounts[state.user.name];
-    if (userAccount && userAccount.isMod) {
+    if (userAccount && (userAccount.isMod || userAccount.isGold)) {
       return false;
     }
   }
