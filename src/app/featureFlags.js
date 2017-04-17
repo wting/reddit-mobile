@@ -44,6 +44,10 @@ const {
   RULES_MODAL_ON_COMMENT_CLICK_ANYWHERE,
   RULES_MODAL_ON_COMMENT_CLICK_BUTTON,
 
+  // Removing defaults experiment
+  VARIANT_DEFAULT_SRS_TUTORIAL,
+  VARIANT_DEFAULT_SRS_POPULAR,
+
   // Xpromo ----------------------------------------------------------------------
   // Login Required
   VARIANT_XPROMO_LOGIN_REQUIRED_IOS,
@@ -367,6 +371,22 @@ const config = {
       seed: 'showamplink',
       percentage: 2,
     },
+  },
+  [VARIANT_DEFAULT_SRS_TUTORIAL]: {
+    url: 'experimentdefaultsrstutorial',
+    and: [{
+      loggedin: true,
+    }, {
+      variant: 'default_srs_holdout:tutorial',
+    }],
+  },
+  [VARIANT_DEFAULT_SRS_POPULAR]: {
+    url: 'experimentdefaultsrspopular',
+    and: [{
+      loggedin: true,
+    }, {
+      variant: 'default_srs_holdout:popular',
+    }],
   },
   [RULES_MODAL_ON_SUBMIT_CLICK_ANYWHERE]: {
     and: [

@@ -120,6 +120,10 @@ export const flags = {
   VARIANT_MIXED_VIEW: 'experimentMixedView',
   SHOW_AMP_LINK: 'showAmpLink',
 
+  // Removing defaults experiment
+  VARIANT_DEFAULT_SRS_TUTORIAL: 'experimentDefaultSrsTutorial',
+  VARIANT_DEFAULT_SRS_POPULAR: 'experimentDefaultSrsPopular',
+
   // RULES
   RULES_MODAL_ON_COMMENT_CLICK_ANYWHERE: 'rulesModalOnCommentClickAnywhere',
   RULES_MODAL_ON_COMMENT_CLICK_BUTTON: 'rulesModalOnCommentClickButton',

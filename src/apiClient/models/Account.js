@@ -34,6 +34,7 @@ export default class Account extends RedditModel {
     subredditName: T.string,
     suspensionExpirationUTC: T.number,
     verified: T.bool,
+    hasSubscribed: T.bool,
   }
 
   static API_ALIASES = {
@@ -55,6 +56,7 @@ export default class Account extends RedditModel {
     oauth_client_id: 'oauthClientId',
     over_18: 'over18',
     suspension_expiration_utc: 'suspensionExpirationUTC',
+    has_subscribed: 'hasSubscribed',
   }
 
   makeUUID(data) {
