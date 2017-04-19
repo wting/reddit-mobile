@@ -145,8 +145,11 @@ export function getXPromoLink(state, path, linkType, additionalData={}) {
 }
 
 function getXpromoClosingTime(state, localStorageKey=BANNER_LAST_CLOSED) {
-  const lastClosedStr = localStorage.getItem(localStorageKey);
-  return (lastClosedStr ? new Date(lastClosedStr).getTime() : 0);
+  if (localStorageAvailable()) {
+    const lastClosedStr = localStorage.getItem(localStorageKey);
+    return (lastClosedStr ? new Date(lastClosedStr).getTime() : 0);
+  }
+  return Infinity;
 }
 
 function getXpromoClosingRange(state, presetRange) {
