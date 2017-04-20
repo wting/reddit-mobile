@@ -112,9 +112,9 @@ export const PostsFromSubredditPage = connect(mapStateToProps)(props => {
       { shouldShowTutorial
         ? <Tutorial />
         : <PostsList
-            postsListId={ postsListId }
-            subredditIsNSFW={ !!subreddit && subreddit.over18 }
-            subredditShowSpoilers={ !!subreddit && subreddit.spoilersEnabled }
+          postsListId={ postsListId }
+          subredditIsNSFW={ !!subreddit && subreddit.over18 }
+          subredditShowSpoilers={ !!subreddit && subreddit.spoilersEnabled }
           />
       }
       <XPromoListingClickModal />

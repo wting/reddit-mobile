@@ -21,6 +21,8 @@ const { DAYMODE } = COLOR_SCHEME;
 const { USUAL, MINIMAL, PERSIST } = XPROMO_DISPLAY_THEMES;
 
 const {
+  XPROMOBANNER,
+
   // XPromo Login Required
   VARIANT_XPROMO_LOGIN_REQUIRED_IOS,
   VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID,
@@ -138,9 +140,7 @@ export function xpromoIsConfiguredOnPage(state) {
   return false;
 }
 
-// @TODO: this should be controlled
-// by FeatureFlags.js config only
-export function xpromoIsEnabledOnPage(state) {
+export function isXPromoEnabledOnPages(state) {
   return isEligibleListingPage(state) || isEligibleCommentsPage(state);
 }
 
@@ -155,7 +155,7 @@ export function isEligibleCommentsPage(state) {
   return actionName === 'comments' && isDayMode(state) && !isNSFWPage(state);
 }
 
-export function xpromoIsEnabledOnDevice(state) {
+function isXPromoEnabledOnDevice(state) {
   const device = getDevice(state);
   // If we don't know what device we're on, then
   // we should not match any list
@@ -181,7 +181,6 @@ export function commentsInterstitialEnabled(state) {
   if (!shouldShowXPromo(state)) {
     return false;
   }
-
   return anyFlagEnabled(state, COMMENTS_PAGE_BANNER_FLAGS);
 }
 
@@ -192,7 +191,7 @@ export function commentsInterstitialEnabled(state) {
  * and redirected to the app store page for the reddit app
  */
 export function listingClickEnabled(state, postId) {
-  if (!isEligibleListingPage(state) || !xpromoIsEnabledOnDevice(state)) {
+  if (!isEligibleListingPage(state) || !isXPromoEnabledOnDevice(state)) {
     return false;
   }
   if (!state.user.loggedOut) {
@@ -351,11 +350,12 @@ export function isXPromoPersistent(state) {
   return isInterstitialDimissed(state) &&
     anyFlagEnabled(state, XPROMO_PERSISTENT_FLAGS);
 }
-
+export function isXPromoBannerEnabled(state) {
+  return anyFlagEnabled(state, [XPROMOBANNER]);
+}
 export function shouldShowXPromo(state) {
   return state.xpromo.interstitials.showBanner &&
-    xpromoIsEnabledOnPage(state) &&
-    xpromoIsEnabledOnDevice(state);
+    isXPromoBannerEnabled(state);
 }
 export function isPartOfXPromoExperiment(state) {
   return shouldShowXPromo(state) && anyFlagEnabled(state, EXPERIMENT_FULL);

@@ -3,10 +3,11 @@ import omitBy from 'lodash/omitBy';
 import isNull from 'lodash/isNull';
 import sha1 from 'crypto-js/sha1';
 import url from 'url';
+import { flags as flagConstants } from 'app/constants';
 import {
-  flags as flagConstants,
-  rulesModalExperimentSubreddits,
-} from 'app/constants';
+  MODAL_EXPERIMENT_LIST as RULES_MODAL_EXPERIMENT_SUBREDDITS,
+  XPROMO_EXCLUDE_LIST as RULES_XPROMO_SUBREDDITS,
+} from 'app/subredditRulesList';
 import getSubreddit from 'lib/getSubredditFromState';
 import getRouteMetaFromState from 'lib/getRouteMetaFromState';
 import getContentId from 'lib/getContentIdFromState';
@@ -17,7 +18,7 @@ import {
 } from 'lib/experiments';
 import { getEventTracker } from 'lib/eventTracker';
 import { getBasePayload } from 'lib/eventUtils';
-import { getDevice, IPHONE, IOS_DEVICES, ANDROID } from 'lib/getDeviceFromState';
+import { getDevice, IPHONE, ANDROID } from 'lib/getDeviceFromState';
 import isFakeSubreddit from 'lib/isFakeSubreddit';
 
 const {
@@ -77,9 +78,12 @@ const config = {
   [BETA]: true,
   [XPROMOBANNER]: {
     and: [
-      { allowedPages: ['index', 'listing'] },
+      { allowedPages: ['index', 'listing', 'comments'] },
       { allowNSFW: false },
-      { allowedDevices: IOS_DEVICES.concat(ANDROID) },
+      { allowedDevices: [IPHONE, ANDROID] },
+      { not: {
+        subreddits: RULES_XPROMO_SUBREDDITS },
+      },
     ],
   },
   [USE_BRANCH]: true,
@@ -182,7 +186,6 @@ const config = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_IOS]: {
     and: [
       { allowedDevices: [IPHONE] },
-      { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
       { or: [
         { url: 'xpromologinrequired' },
@@ -193,7 +196,6 @@ const config = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_IOS_CONTROL]: {
     and: [
       { allowedDevices: [IPHONE] },
-      { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
       { or: [
         { variant: 'mweb_xpromo_require_login_ios:control_1' },
@@ -204,7 +206,6 @@ const config = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID]: {
     and: [
       { allowedDevices: [ANDROID] },
-      { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
       { or: [
         { url: 'xpromologinrequired' },
@@ -215,7 +216,6 @@ const config = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID_CONTROL]: {
     and: [
       { allowedDevices: [ANDROID] },
-      { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
       { or: [
         { variant: 'mweb_xpromo_require_login_android:control_1' },
@@ -267,7 +267,6 @@ const config = {
     and: [
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing', 'comments'] },
-      { allowNSFW: false },
       { not: { or: [
         { peak: 'mweb_xpromo_modal_listing_click_ios' },
         { peak: 'mweb_xpromo_require_login_ios' },
@@ -282,7 +281,6 @@ const config = {
     and: [
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing', 'comments'] },
-      { allowNSFW: false },
       { not: { or: [
         { peak: 'mweb_xpromo_modal_listing_click_android' },
         { peak: 'mweb_xpromo_require_login_android' },
@@ -391,7 +389,7 @@ const config = {
   [RULES_MODAL_ON_SUBMIT_CLICK_ANYWHERE]: {
     and: [
       { allowedPages: ['submit'] },
-      { subreddits: rulesModalExperimentSubreddits },
+      { subreddits: RULES_MODAL_EXPERIMENT_SUBREDDITS },
       { loggedin: true },
       { isMod: false },
       { or: [
@@ -405,7 +403,7 @@ const config = {
       { allowedPages: ['submit'] },
       { loggedin: true },
       { isMod: false },
-      { subreddits: rulesModalExperimentSubreddits },
+      { subreddits: RULES_MODAL_EXPERIMENT_SUBREDDITS },
       { or: [
         { url: 'rulesmodalonsubmitclickbutton' },
         { variant: 'mweb_rules_modal_on_submit:click_button' },
@@ -417,7 +415,7 @@ const config = {
       { allowedPages: ['comments'] },
       { loggedin: true },
       { isMod: false },
-      { subreddits: rulesModalExperimentSubreddits },
+      { subreddits: RULES_MODAL_EXPERIMENT_SUBREDDITS },
       { or: [
         { url: 'rulesmodaloncommentclickanywhere' },
         { variant: 'mweb_rules_modal_on_comment:click_anywhere' },
@@ -429,7 +427,7 @@ const config = {
       { allowedPages: ['comments'] },
       { loggedin: true },
       { isMod: false },
-      { subreddits: rulesModalExperimentSubreddits },
+      { subreddits: RULES_MODAL_EXPERIMENT_SUBREDDITS },
       { or: [
         { url: 'rulesmodaloncommentclickbutton' },
         { variant: 'mweb_rules_modal_on_comment:click_button' },

@@ -5,10 +5,11 @@ import url from 'url';
 
 import {
   getXPromoExperimentPayload,
-  xpromoIsEnabledOnDevice,
   commentsInterstitialEnabled,
   isEligibleListingPage,
   isEligibleCommentsPage,
+  isXPromoBannerEnabled,
+  isXPromoEnabledOnPages,
 } from 'app/selectors/xpromo';
 
 import { interstitialData } from 'lib/xpromoState';
@@ -199,25 +200,21 @@ export function trackXPromoIneligibleEvent(state, additionalEventData, ineligibi
   });
 }
 
-export function trackPagesXPromoEvents(state, additionalEventData) {
-  if (isEligibleListingPage(state)) {
-    const ineligibilityReason = shouldNotShowBanner(state);
-    if (ineligibilityReason) {
-      trackXPromoIneligibleEvent(state, additionalEventData, ineligibilityReason);
-    } else if (xpromoIsEnabledOnDevice(state)) {
-      // listing pages always track view events because they'll either see
-      // the normal xpromo, or the login required variant
-      trackXPromoView(state, additionalEventData);
-    }
-  } else if (isEligibleCommentsPage(state)) {
-    const ineligibilityReason = shouldNotShowBanner(state);
-    if (ineligibilityReason) {
-      trackXPromoIneligibleEvent(state, additionalEventData, ineligibilityReason);
-      // otherwise check if this is a valid page, and the comments page
-      // xpromo is enabled.
-    } else if (xpromoIsEnabledOnDevice(state) && commentsInterstitialEnabled(state)) {
-      trackXPromoView(state, additionalEventData);
-    }
+function trackPagesXPromoEvents(state, additionalEventData) {
+  // Before triggering any of these xPromo events, we need
+  // be sure that the first and main XPROMOBANNER is enabled
+  // on these: PAGE / DEVICE / NSFW / SUBREDDIT
+  if (!isXPromoBannerEnabled(state)) {
+    return false;
+  }
+  const ineligibilityReason = shouldNotShowBanner(state);
+
+  if (ineligibilityReason && isXPromoEnabledOnPages(state)) {
+    return trackXPromoIneligibleEvent(state, additionalEventData, ineligibilityReason);
+  } else if (isEligibleListingPage(state) || commentsInterstitialEnabled(state)) {
+    // listing pages always track view events because they'll
+    // either see the normal xpromo, or the login required variant
+    return trackXPromoView(state, additionalEventData);
   }
 }
 
