@@ -1,15 +1,29 @@
+/**
+  NOTE: currently we have only one URL-flag that should be maintained:
+  '?no_xpromo_interstitial=true' — will dismiss all the XPromo experiments.
+
+  The synchronisation of URL-flags consists of the two parts:
+  1) we record the opt-out status to redux state:
+  — (Client.js, on the beginning) reading of LocalStorage key 'opt Outs' if exist;
+  - (Here) monitoring of all the URL changes and availability of the proper /?' pathnames;
+  2) and sync it to localStorage:
+  — (LocalStorageSync.js) via 'makeLocalStorageArchiver' that will synchronize
+  LocalStorage everytime when page will changed/updated by the router.
+*/
+
 import merge from 'platform/merge';
 import * as platformActions from 'platform/actions';
-import { XPROMO_INTERSTITIAL_OPT_OUT } from 'app/constants';
+import { OPT_OUT_XPROMO_INTERSTITIAL } from 'app/constants';
 
-const DEFAULT = {};
+const { URL_FLAG, STORE_KEY } = OPT_OUT_XPROMO_INTERSTITIAL;
+
+export const DEFAULT = {};
 
 export default function (state=DEFAULT, action={}) {
   switch (action.type) {
     case platformActions.SET_PAGE: {
       const { queryParams } = action.payload;
-
-      const xpromoSetting = queryParams[XPROMO_INTERSTITIAL_OPT_OUT];
+      const xpromoSetting = queryParams[URL_FLAG];
 
       // If the setting is not present, we treat it as such.
       if (xpromoSetting === undefined) {
@@ -19,12 +33,12 @@ export default function (state=DEFAULT, action={}) {
       // Unset the flag
       if (xpromoSetting === 'false') {
         return merge(state, {
-          xpromoInterstitial: undefined,
+          [STORE_KEY]: undefined,
         });
       }
 
       return merge(state, {
-        xpromoInterstitial: true,
+        [STORE_KEY]: true,
       });
     }
 

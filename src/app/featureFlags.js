@@ -3,7 +3,10 @@ import omitBy from 'lodash/omitBy';
 import isNull from 'lodash/isNull';
 import sha1 from 'crypto-js/sha1';
 import url from 'url';
-import { flags as flagConstants } from 'app/constants';
+import {
+  OPT_OUT_XPROMO_INTERSTITIAL,
+  flags as flagConstants,
+} from 'app/constants';
 import {
   MODAL_EXPERIMENT_LIST as RULES_MODAL_EXPERIMENT_SUBREDDITS,
   XPROMO_EXCLUDE_LIST as RULES_XPROMO_SUBREDDITS,
@@ -78,6 +81,7 @@ const config = {
   [BETA]: true,
   [XPROMOBANNER]: {
     and: [
+      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
       { allowedPages: ['index', 'listing', 'comments'] },
       { allowNSFW: false },
       { allowedDevices: [IPHONE, ANDROID] },
@@ -319,6 +323,7 @@ const config = {
   },
   [VARIANT_MODAL_LISTING_CLICK_IOS]: {
     and: [
+      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
       { allowedDevices: [IPHONE] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
@@ -335,6 +340,7 @@ const config = {
   },
   [VARIANT_MODAL_LISTING_CLICK_ANDROID]: {
     and: [
+      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
       { allowedDevices: [ANDROID] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },

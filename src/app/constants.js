@@ -64,9 +64,12 @@ export const VISITED_POSTS_COUNT = 20;
 
 export const RECENT_CLICKS_LENGTH = 5;
 
-export const XPROMO_INTERSTITIAL_OPT_OUT = 'no_xpromo_interstitial';
-
 export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click';
+
+export const OPT_OUT_XPROMO_INTERSTITIAL = {
+  STORE_KEY : 'xpromoInterstitial',
+  URL_FLAG : 'no_xpromo_interstitial',
+};
 
 /**
  * Listing clicks have a target type,
