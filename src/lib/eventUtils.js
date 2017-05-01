@@ -12,6 +12,7 @@ import {
   isXPromoEnabledOnPages,
 } from 'app/selectors/xpromo';
 
+import getSessionIdFromCookie from 'lib/getSessionIdFromCookie';
 import { interstitialData } from 'lib/xpromoState';
 
 import {
@@ -138,6 +139,7 @@ export function getBasePayload(state) {
     dnt: !!window.DO_NOT_TRACK,
     compact_view: compact,
     adblock: hasAdblock(),
+    session_id: getSessionIdFromCookie(),
     ...getUserInfoOrLoid(state),
   };
 
