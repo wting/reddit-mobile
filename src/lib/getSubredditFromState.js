@@ -1,5 +1,6 @@
-export default function getSubreddit(state) {
+import get from 'lodash/get';
 
+export default function getSubreddit(state) {
   if (state.platform.currentPage.urlParams.subredditName) {
     return state.platform.currentPage.urlParams.subredditName;
   }
@@ -24,4 +25,15 @@ export default function getSubreddit(state) {
   }
 
   return comment.subreddit;
+}
+
+export function getSubredditNamePrefixed(state) {
+  const subredditName = getSubreddit(state);
+  if (!subredditName) {
+    return;
+  }
+  return get(state,
+    `subreddits.${subredditName.toLowerCase()}.displayNamePrefixed`,
+    `r/${subredditName}`,
+  );
 }

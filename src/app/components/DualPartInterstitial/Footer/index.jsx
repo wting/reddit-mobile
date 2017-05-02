@@ -7,7 +7,7 @@ import url from 'url';
 
 import { redirect } from 'platform/actions';
 import * as xpromoActions from 'app/actions/xpromo';
-import getSubreddit from 'lib/getSubredditFromState';
+import { getSubredditNamePrefixed } from 'lib/getSubredditFromState';
 import { XPROMO_DISPLAY_THEMES as THEME } from 'app/constants';
 import { getXPromoLinkforCurrentPage } from 'lib/xpromoState';
 import {
@@ -64,7 +64,7 @@ class DualPartInterstitialFooter extends React.Component {
 
   render() {
     const {
-      subredditName,
+      subredditNamePrefixed,
       nativeInterstitialLink,
       navigator,
       requireLogin,
@@ -87,7 +87,7 @@ class DualPartInterstitialFooter extends React.Component {
       );
     }
 
-    const pageName = subredditName ? `r/${ subredditName }` : 'Reddit';
+    const pageName = subredditNamePrefixed ? subredditNamePrefixed : 'Reddit';
     const subtitleText = `View ${ pageName } in the app because you deserve the best.`;
     const buttonText = (xpromoTheme === THEME.PERSIST ? 'Open in app' : 'Continue');
 
@@ -113,8 +113,8 @@ class DualPartInterstitialFooter extends React.Component {
 }
 
 const selector = createStructuredSelector({
-  subredditName: getSubreddit,
   requireLogin: requireXPromoLogin,
+  subredditNamePrefixed: getSubredditNamePrefixed,
   nativeInterstitialLink: state => getXPromoLinkforCurrentPage(state, 'interstitial'),
   nativeLoginLink: state => getXPromoLinkforCurrentPage(state, 'login'),
 });
