@@ -231,10 +231,11 @@ export function shouldNotShowBanner(state) {
 
 export function listingClickInitialState() {
   // Check if there's been a listing click in the last two weeks
-  const lastClickedStr = localStorage.getItem(XPROMO_LAST_MODAL_CLICK);
+  const lastClickedStr = localStorageAvailable() ? localStorage.getItem(XPROMO_LAST_MODAL_CLICK) : null;
   const lastModalClick = lastClickedStr ? new Date(lastClickedStr).getTime() : 0;
+  const ineligibilityReason = localStorageAvailable() ? null : 'local_storage_unavailable';
   return {
-    ineligibilityReason: localStorageAvailable() ? null : 'local_storage_unavailable',
+    ineligibilityReason,
     lastModalClick,
   };
 }
