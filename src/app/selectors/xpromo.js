@@ -128,6 +128,10 @@ export function xpromoTheme(state) {
 export function xpromoThemeIsUsual(state) {
   return xpromoTheme(state) === USUAL;
 }
+export function isXPromoFixedBottom(state) {
+  const theme = xpromoTheme(state);
+  return (theme === PERSIST || theme === MINIMAL);
+}
 
 export function xpromoIsConfiguredOnPage(state) {
   const actionName = getRouteActionName(state);

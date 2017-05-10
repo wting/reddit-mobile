@@ -8,6 +8,7 @@ import EUCookieNotice from 'app/components/EUCookieNotice';
 import TopNav from 'app/components/TopNav';
 import { 
   XPromoIsActive,
+  isXPromoFixedBottom,
   loginRequiredEnabled as loginRequiredXPromoVariant,
 } from 'app/selectors/xpromo';
 
@@ -16,9 +17,20 @@ const renderXPromoBanner = (children, isDisplay=false, mixin=false) => {
 };
 
 const NavFrame = props => {
-  const { children, requireLogin, showXPromo } = props;
+  const {
+    children,
+    showXPromo,
+    requireLogin,
+    isXPromoFixed,
+  } = props;
+
+  // xPromoPadding is an additional hidden DOM element that helps
+  // to avoid the situation when a bottom-fixed (CSS rules) banner
+  // is overlapping the content at the end of the page.
+  const showXPromoPadding = (showXPromo && isXPromoFixed);
+  const xPromoPadding = renderXPromoBanner(children, showXPromoPadding, 'm-invisible');
   const xPromoBanner = renderXPromoBanner(children, showXPromo);
-  const xPromoForContentPadding = renderXPromoBanner(children, showXPromo, 'm-invisible');
+
   const otherContent = requireLogin ? null : (
     <div>
       <TopNav />
@@ -26,7 +38,7 @@ const NavFrame = props => {
         <EUCookieNotice />
         { children }
       </div>
-      { xPromoForContentPadding }
+      { xPromoPadding }
     </div>
   );
 
@@ -40,9 +52,10 @@ const NavFrame = props => {
 
 const xPromoSelector = createSelector(
   XPromoIsActive,
+  isXPromoFixedBottom,
   loginRequiredXPromoVariant,
-  (showXPromo, requireLogin) => {
-    return { showXPromo, requireLogin};
+  (showXPromo, isXPromoFixed, requireLogin) => {
+    return { showXPromo, isXPromoFixed, requireLogin};
   },
 );
 
