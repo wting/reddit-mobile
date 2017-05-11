@@ -11,9 +11,11 @@ import { combineReducers } from 'redux';
 import interstitials from './interstitials';
 import listingClick from './listingClick';
 import persistent from './persistent';
+import serverSide from './serverSide';
 
 export default combineReducers({
   interstitials,
   listingClick,
   persistent,
+  serverSide,
 });

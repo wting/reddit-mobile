@@ -156,6 +156,24 @@ export const flags = {
   // XPromo Persistent Banner
   VARIANT_XPROMO_PERSISTENT_IOS: 'experimentXPromoPersistentIos',
   VARIANT_XPROMO_PERSISTENT_ANDROID: 'experimentXPromoPersistentAndroid',
+
+  // Ad loading (preloader and Mobile App redirect button)
+  // Note: client and server side rendering
+  VARIANT_XPROMO_AD_LOADING_IOS: 'experimentXPromoAdLoadingIos',
+  VARIANT_XPROMO_AD_LOADING_ANDROID: 'experimentXPromoAdLoadingAndroid',
+};
+
+// Now we have 2 different types of XPromo
+// 1) interstitial banners (USUAL, MINIMAL, PERSIST...)
+// 2) main and comments ad loader (main, comments)
+export const XPROMO_TYPES = {
+  INTERSTITIAL: 'interstitial',         // All interstitials banners
+  ADLOADING: 'ad_loading',              // App button inside the preloader
+};
+
+export const XPROMO_ADLOADING_TYPES = {
+  MAIN: 'ad_loading_main',
+  COMMENTS: 'ad_loading_comment',
 };
 
 export const XPROMO_DISPLAY_THEMES = {
@@ -163,6 +181,7 @@ export const XPROMO_DISPLAY_THEMES = {
   LOGIN: 'require_login',               // ...same as USUAL but with login link instead of subtext
   MINIMAL: 'black_banner_fixed_bottom', // Black banner in the fixed bottom position and dismiss link
   PERSIST: 'persistent_banner',         // ...same as MINIMAL but without dismiss link
+  ADLOADING: 'ad_loading',
 };
 
 export const COLOR_SCHEME = {

@@ -61,9 +61,9 @@ export function isXPromoPersistentEnabled(state) {
   return isXPromoPersistent(state);
 }
 
-export function getXPromoLinkforCurrentPage(state, linkType) {
-  const path = window.location.href.split(window.location.host)[1];
-  return getXPromoLink(state, path, linkType);
+export function getXPromoLinkforCurrentPage(state, linkType, additionalData={}) {
+  const path = state.platform.currentPage.url;
+  return getXPromoLink(state, path, linkType, additionalData);
 }
 
 export function getXPromoListingClickLink(state, postId, listingClickType) {
@@ -103,19 +103,17 @@ function getXPromoListingClickPath(state, post, listingClickType) {
         }
         return '/';
       }
-
-
       return post.cleanPermalink;
     }
   }
 }
 
-export function getXPromoLink(state, path, linkType, additionalData={}) {
+function getXPromoLink(state, path, linkType, additionalData={}) {
   let payload = {
-    ...additionalData,
     utm_source: 'xpromo',
     utm_content: linkType,
     ...interstitialData(state),
+    ...additionalData,
   };
 
   const experimentData = getXPromoExperimentPayload(state);
@@ -138,10 +136,7 @@ export function getXPromoLink(state, path, linkType, additionalData={}) {
     ...xPromoExtraScreenViewData(state),
   };
 
-  return getBranchLink(state, path, {
-    ...payload,
-    ...xPromoExtraScreenViewData(state),
-  });
+  return getBranchLink(state, path, payload);
 }
 
 function getXpromoClosingTime(state, localStorageKey=BANNER_LAST_CLOSED) {
@@ -253,7 +248,7 @@ export const markListingClickTimestampLocalStorage = (dateTime) => {
   localStorage.setItem(XPROMO_LAST_MODAL_CLICK, dateTime);
 };
 
-function interstitialType(state) {
+export function interstitialType(state) {
   if (isEligibleListingPage(state)) {
     if (state.xpromo.listingClick.active) {
       return XPROMO_MODAL_LISTING_CLICK_NAME;

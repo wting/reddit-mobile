@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import Ad from 'app/components/Ad';
 import PaginationButtons from 'app/components/PaginationButtons';
 import Post from 'app/components/Post';
-import Loading from 'app/components/Loading';
+import LoadingXpromo from 'app/components/LoadingXpromo';
 import adLocationForPostRecords from 'lib/adLocationForPostRecords';
 
 const T = React.PropTypes;
@@ -15,8 +15,11 @@ export const PostsList = props => {
   const { loading, postRecords, nextUrl, prevUrl, shouldPage } = props;
   const shouldRenderPagination = !loading && shouldPage && postRecords.length;
 
-  if (loading) {
-    return <Loading />;
+  // On the Server side, the const "loading" is false until the client-side
+  // is loaded, so we need to check the contents of the postRecords to find
+  // out whether to show the Loader while rendering on the server-side
+  if (loading || (!postRecords.length)) {
+    return <LoadingXpromo />;
   }
 
   return (

@@ -1,9 +1,14 @@
+import get from 'lodash/get';
 import find from 'lodash/find';
 import omit from 'lodash/omit';
+import omitBy from 'lodash/omitBy';
+import isNull from 'lodash/isNull';
 import values from 'lodash/values';
 import url from 'url';
 
+import { xpromoAddBucketingEvent } from 'app/actions/xpromo';
 import {
+  isXPromoAdLoadingEnabled,
   getXPromoExperimentPayload,
   commentsInterstitialEnabled,
   isEligibleListingPage,
@@ -14,7 +19,6 @@ import {
 
 import getSessionIdFromCookie from 'lib/getSessionIdFromCookie';
 import { interstitialData } from 'lib/xpromoState';
-
 import {
   buildAdditionalEventData as listingPageEventData,
 } from 'app/router/handlers/PostsFromSubreddit';
@@ -46,8 +50,7 @@ export function convertId(id) {
 }
 
 function getSubredditFromState(state) {
-  const { subredditName } = state.platform.currentPage.urlParams;
-
+  const subredditName = get(state,'platform.currentPage.urlParams.subredditName', undefined);
   if (subredditName && !isFakeSubreddit(subredditName)) {
     return state.subreddits[subredditName.toLowerCase()];
   }
@@ -55,15 +58,13 @@ function getSubredditFromState(state) {
 
 export function buildSubredditData(state) {
   const subreddit = getSubredditFromState(state);
-
-  if (!subreddit) {
-    return {};
+  if (subreddit) {
+    return {
+      sr_id: convertId(subreddit.name),
+      sr_name: subreddit.displayName,
+    };
   }
-
-  return {
-    sr_id: convertId(subreddit.name),
-    sr_name: subreddit.displayName,
-  };
+  return {};
 }
 
 export function buildProfileData(state, extraPayload) {
@@ -81,7 +82,6 @@ export function buildProfileData(state, extraPayload) {
   if (!user) {
     return null;
   }
-
 
   return {
     target_name: user.name,
@@ -136,14 +136,30 @@ export function getBasePayload(state) {
     referrer_domain: referrer ? getDomain(referrer, meta) : '',
     referrer_url: referrer,
     language: preferences.lang,
-    dnt: !!window.DO_NOT_TRACK,
+    dnt: (typeof (window)!=='undefined' ? !!window.DO_NOT_TRACK : false),
     compact_view: compact,
     adblock: hasAdblock(),
-    session_id: getSessionIdFromCookie(),
+    session_id: getSessionId(state),
     ...getUserInfoOrLoid(state),
   };
 
   return payload;
+}
+
+function getSessionId(state) {
+  const userCtxCookie = ((state) => {
+    const user = state.user;
+    const usertRequests = state.accountRequests[user.name];
+    if (usertRequests) {
+      return usertRequests.meta['set-cookie'];
+    }
+  })(state);
+
+  // Currently, this userCtxCookie
+  // (which comes from state.accountRequest.meta.set-cookie) helps
+  // to get the correct SessionId from the server-side cookie, but
+  // we can use it on both sides (on the client and server side).
+  return getSessionIdFromCookie(userCtxCookie);
 }
 
 function trackScreenViewEvent(state, additionalEventData) {
@@ -200,24 +216,6 @@ export function trackXPromoIneligibleEvent(state, additionalEventData, ineligibi
     ...additionalEventData,
     ineligibility_reason: ineligibilityReason,
   });
-}
-
-function trackPagesXPromoEvents(state, additionalEventData) {
-  // Before triggering any of these xPromo events, we need
-  // be sure that the first and main XPROMOBANNER is enabled
-  // on these: PAGE / DEVICE / NSFW / SUBREDDIT
-  if (!isXPromoBannerEnabled(state)) {
-    return false;
-  }
-  const ineligibilityReason = shouldNotShowBanner(state);
-
-  if (ineligibilityReason && isXPromoEnabledOnPages(state)) {
-    return trackXPromoIneligibleEvent(state, additionalEventData, ineligibilityReason);
-  } else if (isEligibleListingPage(state) || commentsInterstitialEnabled(state)) {
-    // listing pages always track view events because they'll
-    // either see the normal xpromo, or the login required variant
-    return trackXPromoView(state, additionalEventData);
-  }
 }
 
 export function trackExperimentClickEvent(state, experimentName, experimentId, targetThing) {
@@ -327,4 +325,124 @@ export const logClientAdblock = (method, placementIndex, state) => {
   };
 
   getEventTracker().track('ad_serving_events', 'cs.adblock', payload);
+};
+
+/* Track XPromo View event for AdLoading (Client and Server side).
+ *
+ * @note: Server-side. The XPromo-view event is
+ * started manually if the experiment is enabled.
+ * @note: Client-side. We should use new Set (this will work 5 times faster
+ * than Redux store). The idea is to record the AdLoading types that were shown,
+ * and at the end of the page setupping (or its navigation), call the XPromo View event
+ *
+ * @param {Object} state               - Redux Store state
+ * @param {Object} additionalEventData - Any additional event data
+ */
+const adLoadingXPromoView = new Set(['init']);
+
+export const addToQueueAdLoadingXPromoViewEvent = (interstitialType) => {
+  if (process.env.ENV === 'client') {
+    adLoadingXPromoView.add(interstitialType);
+  }
+};
+
+function trackAdLoadingXPromoEvents(state, additionalEventData) {
+  if (isXPromoAdLoadingEnabled(state)) {
+    if (process.env.ENV === 'server') {
+      // This event should only be fire on the
+      // server-side if the experiment is enabled
+      trackXPromoView(state, additionalEventData);
+    } else {
+      // If this experiment is enabled, it means that the XpromoView
+      // event is already fired on the server-side, so for the first
+      // time on the client-side (if we have init), we need to skip it.
+      if (!adLoadingXPromoView.has('init') && adLoadingXPromoView.size) {
+        const { value } = adLoadingXPromoView.values().next();
+        trackXPromoView(state, {interstitial_type: value});
+      }
+      adLoadingXPromoView.clear();
+    }
+  }
+}
+
+function trackInterstitialXPromoEvents(state, additionalEventData) {
+  // Before triggering any of these xPromo events, we need
+  // be sure that the first and main XPROMOBANNER is enabled
+  // on these: PAGE / DEVICE / NSFW / SUBREDDIT
+  if (!isXPromoBannerEnabled(state)) {
+    return false;
+  }
+  const ineligibilityReason = shouldNotShowBanner(state);
+
+  if (ineligibilityReason && isXPromoEnabledOnPages(state)) {
+    if (process.env.ENV === 'client') {
+      return trackXPromoIneligibleEvent(state, additionalEventData, ineligibilityReason);
+    }
+  } else if (isEligibleListingPage(state) || commentsInterstitialEnabled(state)) {
+    // listing pages always track view events because they'll
+    // either see the normal xpromo, or the login required variant
+    return trackXPromoView(state, additionalEventData);
+  }
+}
+
+export function trackPagesXPromoEvents(state, additionalEventData) {
+  trackAdLoadingXPromoEvents(state, additionalEventData);
+  trackInterstitialXPromoEvents(state, additionalEventData);
+}
+
+/* Track bucketing event and the Client and Server side.
+ *
+ * @note: Each bucket events should be fired once per session.
+ * Since this function works both on the Client and Server side: 
+ * — Client side will use the "new Set()" to store and check the unique of fired events.
+ * — Server side will store the fired events into the Redux Store (this is the only option 
+ * to notify the Client side that the event occurred on the Server).
+ *
+ * @param {Object} state          - Redux Store state
+ * @param {Object} experimentData - Experiments id, name, variant, owner (from incoming JSON) 
+ * @param {Fucntion} dispatch     - Redux Store Dispatch. If it exists, then the name of the bucket
+ * event will be stored in the Redux Store to notify the client that it has already occurred.
+ */
+const firstBuckets = new Set(); // Will only work on the client side
+
+export const trackBucketingEvents = (state, experimentData, dispatch) => {
+  if (experimentData) {
+    const { variant, experiment_id, owner, experiment_name } = experimentData;
+
+    // we only want to bucket the user once per session for any given experiment.
+    // to accomplish this, we're going to use the fact that featureFlags is a
+    // singleton, and use `firstBuckets` (which is in this module's closure's
+    // scope) to keep track of which experiments we've already bucketed.
+
+    // On the Server side this condition will be always true.
+    // "New Set()" on the server side will NOT work per session.
+    // Case:
+    // — open Index and Comments pages
+    // — reload the Index page -> "New Set()" will get the bucket name
+    // — reload Comment page at the same time -> bucket name will not be fired because of the "New Set()"
+
+    if (!firstBuckets.has(experiment_name)) {
+
+      if (dispatch) {
+        dispatch(xpromoAddBucketingEvent(experiment_name));
+      }
+
+      if (process.env.ENV === 'client') {
+        // There is some concern about requests and applying
+        // this "new Set()" for the multiple users per request.
+        // That's why it should only work on the client side
+        firstBuckets.add(experiment_name);
+      }
+
+      const payload = {
+        ...getBasePayload(state),
+        experiment_id,
+        experiment_name,
+        variant,
+        owner: owner || null,
+      };
+
+      getEventTracker().track('bucketing_events', 'cs.bucket', omitBy(payload, isNull));
+    }
+  }
 };

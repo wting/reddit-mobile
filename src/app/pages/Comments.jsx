@@ -12,7 +12,9 @@ import RelevantContent from 'app/components/RelevantContent';
 import CommentTree from 'app/components/CommentTree';
 import CommentsPageTools from 'app/components/CommentsPage/CommentsPageTools';
 import Post from 'app/components/Post';
-import Loading from 'app/components/Loading';
+
+import LoadingXpromo from 'app/components/LoadingXpromo';
+
 import RecommendedPosts from 'app/components/RecommendedPosts';
 import RecommendedSubreddits from 'app/components/RecommendedSubreddits';
 import SubNav from 'app/components/SubNav';
@@ -20,7 +22,6 @@ import getSubreddit from 'lib/getSubredditFromState';
 
 import CommentsPageHandler from 'app/router/handlers/CommentsPage';
 import { paramsToCommentsPageId } from 'app/models/CommentsPage';
-
 
 const T = React.PropTypes;
 
@@ -42,7 +43,7 @@ function CommentsPage(props) {
   if (!postLoaded) {
     return (
       <div className='CommentsPage'>
-        <Loading />
+        <LoadingXpromo />
       </div>
     );
   }
@@ -164,6 +165,5 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onToggleReply: () => onToggleReply(stateProps.post.name),
   };
 };
-
 
 export default connect(stateProps, dispatchProps, mergeProps)(CommentsPage);

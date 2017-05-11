@@ -1,0 +1,74 @@
+@import (reference) '~app/less/variables';
+@import (reference) '~app/less/mixins/importAll';
+@import (reference) '~app/components/Loading/styles';
+
+@import '~app/less/animations/loadingBlink';
+@import '~app/less/animations/loadingGrowup';
+
+.adLoading {
+  padding: @size;
+  text-align: center;
+  position: relative;
+  padding: 60px 10px;
+
+  &__logo{
+    position: relative;
+    background: #000;
+    border-radius: 100px;
+    margin: 0 auto 10px;
+    display: inline-block;
+    overflow: hidden;
+    z-index: 3;
+
+    &Bg {
+      z-index: 1;
+      content: '';
+      position: absolute;
+      bottom: 0;left: 0; right: 0; top: 0;
+      background: @orangered;
+
+      .growupAnimation();
+    }
+
+    .SnooIcon {
+      position: relative;
+      fill: transparent;
+      margin: auto;
+      height: 140px;
+      width: 140px;
+      z-index: 2;
+
+      circle { fill: transparent; }
+    }
+  }
+
+  h3 {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  &__button {
+    display: inline-block;
+    position: relative;
+    margin: 8px auto 4px;
+    z-index: 2;
+  }
+  .Loading{
+    padding: 15px;
+  }
+}
+
+.textLoader {
+  span {
+    display: inline-block;
+    border-radius: 50%;
+    position: relative;
+    height: 3px; width: 3px;
+    background: #000;
+    margin-left: 2px;
+  }
+  &__ball1 { .blinkAnimation1() }
+  &__ball2 { .blinkAnimation2() }
+  &__ball3 { .blinkAnimation3() }
+}
