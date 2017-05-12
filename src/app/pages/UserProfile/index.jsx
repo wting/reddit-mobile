@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import { Anchor } from 'platform/components';
+import NSFWWrapper from 'app/components/NSFWWrapper';
 import { UserProfileHeader } from 'app/components/UserProfileHeader';
 import { UserProfileSummary } from 'app/components/UserProfileSummary';
 import Loading from 'app/components/Loading';
@@ -16,38 +17,57 @@ const mapStateToProps = createSelector(
   userAccountSelector,
   (state, props) => state.accounts[props.urlParams.userName.toLowerCase()],
   (state, props) => state.accountRequests[props.urlParams.userName],
-  (myUser, queriedUser, queriedUserRequest) => {
+  state => state.subreddits,
+  state => state.preferences,
+  (myUser, queriedUser, queriedUserRequest, subreddits, preferences) => {
     return {
       myUser,
       queriedUser: queriedUser || {},
       queriedUserRequest,
+      isContributor: queriedUser && !!queriedUser.subredditName,
+      queriedUserSubreddit: queriedUser ? subreddits[queriedUser.subredditName] : null,
+      preferences,
     };
   },
 );
 
 export const UserProfilePage = connect(mapStateToProps)(props => {
-  const { myUser, queriedUser, queriedUserRequest, url } = props;
+  const {
+    myUser,
+    queriedUser,
+    queriedUserRequest,
+    url,
+    isContributor,
+    queriedUserSubreddit: userSubreddit,
+    preferences,
+  } = props;
   const { name: userName, karma, subredditName } = queriedUser;
   const isGildPage = GILD_URL_RE.test(url);
   const isMyUser = !!myUser && myUser.name === userName;
   const loaded = !!queriedUserRequest && !queriedUserRequest.loading;
 
   return (
-    <div className='UserProfilePage'>
-      <Section>
-        { loaded &&
-          <UserProfileHeader
-            userName={ userName }
-            userSubreddit={ subredditName }
-            karma={ karma }
-            isMyUser={ isMyUser }
-          />
-        }
-      </Section>
-      { isGildPage ? <GildPageContent />
-        : queriedUser && loaded ? <UserProfileContent user={ queriedUser } isMyUser={ isMyUser } />
-        : <Loading /> /* do an error state here? */ }
-    </div>
+    <NSFWWrapper
+      isContentAdultStatusKnown={ loaded }
+      isContentOver18={ isContributor && userSubreddit.over18 }
+      userPermitsOver18={ preferences.over18 }
+    >
+      <div className='UserProfilePage'>
+        <Section>
+          { loaded &&
+            <UserProfileHeader
+              userName={ userName }
+              userSubreddit={ subredditName }
+              karma={ karma }
+              isMyUser={ isMyUser }
+            />
+          }
+        </Section>
+        { isGildPage ? <GildPageContent />
+          : queriedUser && loaded ? <UserProfileContent user={ queriedUser } isMyUser={ isMyUser } />
+          : <Loading /> /* do an error state here? */ }
+      </div>
+    </NSFWWrapper>
   );
 });
 
