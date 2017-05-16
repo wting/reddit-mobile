@@ -35,18 +35,16 @@ UserProfileHeader.propTypes = {
   karma: T.number.isRequired,
   currentActivity: T.string,
   isMyUser: T.bool,
-  isVerified: T.bool,
   loading: T.bool,
 };
 
 const UserProfileBanner = props => {
-  const { isMyUser, isVerified, karma, userName, userSubreddit } = props;
+  const { isMyUser, karma, userName, userSubreddit } = props;
   return (
     <div className='UserProfileHeader__banner'>
       <h3 className='UserProfileHeader__banner-user-name'>u/{ userName }</h3>
-      { isVerified && <div className='UserProfileHeader__verified icon icon-verified lime' /> }
       <h5 className='UserProfileHeader__banner-karma'>{ formatNumber(karma) } karma</h5>
-      { userSubreddit && !isMyUser && 
+      { userSubreddit && !isMyUser &&
         <SubredditSubscribeForm
           subredditName={ userSubreddit.toLowerCase() }
           className='CommunityHeader-subscribe-form CommunityHeader-no-outline'

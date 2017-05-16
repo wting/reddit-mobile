@@ -21,7 +21,6 @@ const mapStateToProps = createSelector(
   (myUser, queriedUser, queriedUserRequest, activities, pageProps) => {
     const activitiesParams = UserActivityHandler.pageParamsToActivitiesParams(pageProps);
     const activitiesId = paramsToActiviesRequestId(activitiesParams);
-    const isVerified = queriedUser && queriedUser.verified;
 
     return {
       myUser,
@@ -29,7 +28,6 @@ const mapStateToProps = createSelector(
       queriedUserRequest,
       activitiesId,
       currentActivity: activitiesParams.activity,
-      isVerified,
     };
   },
 );
@@ -41,7 +39,6 @@ export const UserActivityPage = connect(mapStateToProps)(props => {
     queriedUserRequest,
     activitiesId,
     currentActivity,
-    isVerified,
   } = props;
   const { name: userName, karma, subredditName } = queriedUser;
   const isMyUser = !!myUser && myUser.name === userName;
@@ -50,14 +47,13 @@ export const UserActivityPage = connect(mapStateToProps)(props => {
   return (
     <div className='UserProfilePage'>
       <Section>
-        { loaded && 
+        { loaded &&
           <UserProfileHeader
             userName={ userName }
             userSubreddit={ subredditName }
             karma={ karma }
             isMyUser={ isMyUser }
             currentActivity={ currentActivity }
-            isVerified={ isVerified }
           />
         }
       </Section>
