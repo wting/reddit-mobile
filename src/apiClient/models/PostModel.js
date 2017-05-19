@@ -77,6 +77,7 @@ export default class PostModel extends RedditModel {
     suggestedSort: T.string,
     thirdPartyTracking: T.string,
     thirdPartyTracking2: T.string,
+    thirdPartyTrackers: T.string,
     userReports: T.array,
 
     // derived
@@ -119,6 +120,7 @@ export default class PostModel extends RedditModel {
     sendreplies: 'sendReplies',
     third_party_tracking: 'thirdPartyTracking',
     third_party_tracking_2: 'thirdPartyTracking2',
+    third_party_trackers: 'thirdPartyTrackers',
     url: 'cleanUrl',
     user_reports: 'userReports',
   };

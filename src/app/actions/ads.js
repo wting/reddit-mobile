@@ -64,13 +64,18 @@ const IMPRESSION_PROPS = [
   'adserverImpPixel',
   'thirdPartyTracking',
   'thirdPartyTracking2',
+  'thirdPartyTrackers',
 ];
-const trackAdPost = post => {
-  IMPRESSION_PROPS.forEach(prop => {
-    const pixel = new Image();
-    pixel.src = post[prop];
-  });
+
+const firePixel = (src) => {
+  const pixel = new Image();
+  pixel.src = src;
 };
+
+const trackAdPost = post => IMPRESSION_PROPS
+  .map(prop => post[prop] || [])
+  .reduce((acc, cur) => acc.concat(cur), [])
+  .forEach(firePixel);
 
 // Used by Rendered Ads if they detect that adblock has hidden
 // they're content node. This only a thunk'd action because
