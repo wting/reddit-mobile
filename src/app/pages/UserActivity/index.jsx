@@ -32,7 +32,7 @@ const mapStateToProps = createSelector(
       activitiesId,
       currentActivity: activitiesParams.activity,
       isContributor: queriedUser && !!queriedUser.subredditName,
-      queriedUserSubreddit: queriedUser ? subreddits[queriedUser.subredditName] : null,
+      queriedUserSubreddit: queriedUser ? subreddits[queriedUser.subredditName.toLowerCase()] : null,
       preferences,
     };
   },
@@ -55,7 +55,7 @@ export const UserActivityPage = connect(mapStateToProps)(props => {
 
   return (
     <NSFWWrapper
-      isContentAdultStatusKnown={ loaded }
+      isContentAdultStatusKnown={ loaded && (!!userSubreddit || !isContributor) }
       isContentOver18={ isContributor && userSubreddit.over18 }
       userPermitsOver18={ preferences.over18 }
     >
