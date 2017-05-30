@@ -151,7 +151,9 @@ function getSessionId(state) {
     const user = state.user;
     const usertRequests = state.accountRequests[user.name];
     if (usertRequests) {
-      return usertRequests.meta['set-cookie'];
+      if (usertRequests.meta) {
+        return usertRequests.meta['set-cookie'];
+      }
     }
   })(state);
 
