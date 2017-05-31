@@ -279,7 +279,7 @@ const config = {
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { not: { or: [
-        { peak: 'mweb_xpromo_modal_listing_click_ios' },
+        { peak: 'mweb_xpromo_modal_listing_click_retry_ios' },
         { peak: 'mweb_xpromo_require_login_ios' },
       ]}},
       { or: [
@@ -293,7 +293,7 @@ const config = {
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { not: { or: [
-        { peak: 'mweb_xpromo_modal_listing_click_android' },
+        { peak: 'mweb_xpromo_modal_listing_click_retry_android' },
         { peak: 'mweb_xpromo_require_login_android' },
       ]}},
       { or: [
@@ -333,10 +333,10 @@ const config = {
       {
         or: [
           { url: 'xpromolistingclick' },
-          { variant: 'mweb_xpromo_modal_listing_click_ios:hourly_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_ios:hourly_nodismiss' },
-          { variant: 'mweb_xpromo_modal_listing_click_ios:daily_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_ios:daily_nodimiss' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:hourly_dismissible' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:hourly_nodismiss' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:daily_dismissible' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:daily_nodismiss' },
         ],
       },
     ],
@@ -350,10 +350,10 @@ const config = {
       {
         or: [
           { url: 'xpromolistingclick' },
-          { variant: 'mweb_xpromo_modal_listing_click_android:hourly_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_android:hourly_nodismiss' },
-          { variant: 'mweb_xpromo_modal_listing_click_android:daily_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_android:daily_nodimiss' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_android:hourly_dismissible' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_android:hourly_nodismiss' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_android:daily_dismissible' },
+          { variant: 'mweb_xpromo_modal_listing_click_retry_android:daily_nodismiss' },
         ],
       },
     ],

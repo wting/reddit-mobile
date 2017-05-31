@@ -64,7 +64,7 @@ export const VISITED_POSTS_COUNT = 20;
 
 export const RECENT_CLICKS_LENGTH = 5;
 
-export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click';
+export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click_retry';
 
 export const OPT_OUT_XPROMO_INTERSTITIAL = {
   STORE_KEY : 'xpromoInterstitial',
@@ -144,8 +144,8 @@ export const flags = {
   VARIANT_XPROMO_INTERSTITIAL_COMMENTS_ANDROID: 'experimentXPromoInterstitialCommentsAndroid',
 
   // XPromo Modal Listing Click
-  VARIANT_MODAL_LISTING_CLICK_IOS: 'experimentXPromoModalListingClickIOS',
-  VARIANT_MODAL_LISTING_CLICK_ANDROID: 'experimentXPromoModalListingClickAndroid',
+  VARIANT_MODAL_LISTING_CLICK_IOS: 'experimentXPromoModalListingClickRetryIOS',
+  VARIANT_MODAL_LISTING_CLICK_ANDROID: 'experimentXPromoModalListingClickRetryAndroid',
 
   // XPromo Interstitial Frequrency
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS: 'experimentXPromoInterstitialFrequencyIos',
