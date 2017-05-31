@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { some } from 'lodash/collection';
 
 import CommunityHeader from 'app/components/CommunityHeader';
 import LoadingXpromo from 'app/components/LoadingXpromo';
@@ -17,13 +16,6 @@ import { paramsToPostsListsId } from 'app/models/PostsList';
 
 import isFakeSubreddit from 'lib/isFakeSubreddit';
 
-import { flags } from 'app/constants';
-import features from 'app/featureFlags';
-const {
-  VARIANT_DEFAULT_SRS_TUTORIAL,
-  VARIANT_DEFAULT_SRS_POPULAR,
-} = flags;
-
 const mapStateToProps = createSelector(
   (_, props) => props, // props is the page props splatted.
   state => state.postsLists,
@@ -31,13 +23,14 @@ const mapStateToProps = createSelector(
   state => state.preferences,
   state => state.modal.id,
   (state, pageProps) => {
-    if (state.user.loading || state.user.loggedout || state.accounts[state.user.name] === undefined) {
+    const { loading, loggedout, name } = state.user;
+    if (loading || loggedout || state.accounts[name] === undefined) {
       return false;
     }
 
     const postsListParams = PostsFromSubredditHandler.pageParamsToSubredditPostsParams(pageProps);
     const isFrontPage = !postsListParams.subredditName;
-    const hasSubscribed = state.accounts[state.user.name].hasSubscribed;
+    const hasSubscribed = state.accounts[name].hasSubscribed;
 
     return isFrontPage && !hasSubscribed;
   },
