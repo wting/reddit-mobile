@@ -37,11 +37,9 @@ const mapStateToProps = createSelector(
 
     const postsListParams = PostsFromSubredditHandler.pageParamsToSubredditPostsParams(pageProps);
     const isFrontPage = !postsListParams.subredditName;
-    const feature = features.withContext({ state });
-    const tutorialEnabled = some([VARIANT_DEFAULT_SRS_TUTORIAL, VARIANT_DEFAULT_SRS_POPULAR], variant => feature.enabled(variant));
     const hasSubscribed = state.accounts[state.user.name].hasSubscribed;
 
-    return isFrontPage && !hasSubscribed && tutorialEnabled;
+    return isFrontPage && !hasSubscribed;
   },
   (pageProps, postsLists, subreddits, preferences, modalId, shouldShowTutorial) => {
     const postsListParams = PostsFromSubredditHandler.pageParamsToSubredditPostsParams(pageProps);
