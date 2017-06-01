@@ -9,6 +9,7 @@ import {
   COLOR_SCHEME,
   XPROMO_DISPLAY_THEMES,
   XPROMO_MODAL_LISTING_CLICK_NAME,
+  OPT_OUT_XPROMO_INTERSTITIAL_MENU,
 } from 'app/constants';
 
 import features, { isNSFWPage } from 'app/featureFlags';
@@ -125,6 +126,10 @@ function activeXPromoExperimentName(state, flags=EXPERIMENT_FULL) {
     return featureContext.enabled(feature);
   });
   return featureFlag ? EXPERIMENT_NAMES[featureFlag] : null;
+}
+
+export function showXPromoOptOutMenuLink(state) {
+  return !state.optOuts[OPT_OUT_XPROMO_INTERSTITIAL_MENU.STORE_KEY];
 }
 
 export function xpromoTheme(state) {

@@ -1,14 +1,13 @@
 import './styles.less';
 import React from 'react';
-import { OPT_OUT_XPROMO_INTERSTITIAL } from 'app/constants';
+import inlineScript from './script';
+import { OPT_OUT_FLAGS } from 'app/constants';
 
 export class OptOutWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.scriptId = 'app_inline_loader';
-    this.urlFlag = OPT_OUT_XPROMO_INTERSTITIAL.URL_FLAG;
-    this.storageKey = OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY;
-    this.setExperimentEnabled();
+    this.isEnabled = this.shouldEnableExperiment();
   }
 
   // The first time (when rendering on the server side), we need to store
@@ -16,21 +15,22 @@ export class OptOutWrapper extends React.Component {
   // HTML data attribute for this purpose as a temporary storage for the
   // next first rendering on the client side (it must be exactly the same
   // (HTML) as the server).
-  setExperimentEnabled() {
-    this.isEnabled = this.props.isEnabled;
+  shouldEnableExperiment() {
     if (process.env.ENV === 'client') {
       const el = document.getElementById(this.scriptId);
       if (el) {
-        this.isEnabled = el.getAttribute('data-server');
+        return el.getAttribute('data-server');
       }
     }
+    return this.props.isEnabled;
   }
 
   getScript() {
-    // Please take a look at index.test.js (sources),
-    // and be careful with '${...}' script-injections.
+    const strFlags = JSON.stringify(OPT_OUT_FLAGS);
+    const scriptId = JSON.stringify(this.scriptId);
+    const args = [this.isEnabled, scriptId, strFlags];
     return {
-      __html : `!function(){var o=false; var i=!!${this.isEnabled},t="${this.urlFlag}";try{if(window.localStorage){var e=window.localStorage.optOuts;void 0!==e&&i&&(o=!JSON.parse(e)["${this.storageKey}"])};var a=window.location.search;a.split(t).length>1&&i&&(o=!!(a.split(t+"=false").length>1)),document.getElementById("${this.scriptId}").className+=o?" xpromo":""}catch(o){}}();`,
+      __html : `!(${inlineScript})(${args.join(',')});`,
     };
   }
 

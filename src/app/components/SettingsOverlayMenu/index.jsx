@@ -10,6 +10,7 @@ import { LinkRow, ButtonRow, ExpandoRow } from 'app/components/OverlayMenu/Overl
 import menuItems from './SettingsOverlayMenuItems';
 import { COLOR_SCHEME } from 'app/constants';
 import { userAccountSelector } from 'app/selectors/userAccount';
+import { showXPromoOptOutMenuLink } from 'app/selectors/xpromo';
 import config from 'config';
 
 const { NIGHTMODE } = COLOR_SCHEME;
@@ -42,6 +43,15 @@ export const renderLoginRow = () => (
     text='Log in / sign up'
     icon={ userIconClassName }
     href={ '/login' }
+  />
+);
+
+const xpromoOptOutLink = () => (
+  <LinkRow
+    key='xpromo-off'
+    text='Ask To Open In App (On)'
+    icon='icon-linkout icon-large blue'
+    href={ '/?no_xpromo_interstitial_menu=true' }
   />
 );
 
@@ -96,7 +106,7 @@ export const renderLoggedInUserRows = (user) => {
 };
 
 export const SettingsOverlayMenu = (props) => {
-  const { compact, theme, pageData, user } = props;
+  const { compact, theme, pageData, user, optOut } = props;
   const { url, queryParams } = pageData;
   const desktopRedirectParams = { ...queryParams, ...DESKTOP_TRACKING_PARAMS };
 
@@ -125,6 +135,9 @@ export const SettingsOverlayMenu = (props) => {
         href={ config.reddit + urlWith(url, desktopRedirectParams) }
         onClick={ props.onGoToDesktop }
       />
+      {
+        optOut ? xpromoOptOutLink() : null
+      }
       <ExpandoRow
         key='about-reddit'
         icon='icon-info icon-large'
@@ -162,8 +175,9 @@ const mapStateToProps = createSelector(
   state => state.compact,
   state => state.theme,
   state => state.platform.currentPage,
+  showXPromoOptOutMenuLink,
   userAccountSelector,
-  (compact, theme, pageData, user) => ({ compact, theme, pageData, user }),
+  (compact, theme, pageData, optOut, user) => ({ compact, theme, pageData, optOut, user }),
 );
 
 const mergeProps = stateProps => ({

@@ -13,9 +13,7 @@
 
 import merge from 'platform/merge';
 import * as platformActions from 'platform/actions';
-import { OPT_OUT_XPROMO_INTERSTITIAL } from 'app/constants';
-
-const { URL_FLAG, STORE_KEY } = OPT_OUT_XPROMO_INTERSTITIAL;
+import { OPT_OUT_FLAGS } from 'app/constants';
 
 export const DEFAULT = {};
 
@@ -23,23 +21,23 @@ export default function (state=DEFAULT, action={}) {
   switch (action.type) {
     case platformActions.SET_PAGE: {
       const { queryParams } = action.payload;
-      const xpromoSetting = queryParams[URL_FLAG];
-
-      // If the setting is not present, we treat it as such.
-      if (xpromoSetting === undefined) {
+      const matchedOptOutFlag = OPT_OUT_FLAGS.find((item) => {
+        return (queryParams[item.URL_FLAG] !== undefined);
+      });
+      // Dismiss if the optOut array
+      // does not match current URL
+      if (!matchedOptOutFlag) {
         return state;
       }
+      const { URL_FLAG, STORE_KEY } = matchedOptOutFlag;
+      const xpromoSetting = queryParams[URL_FLAG];
 
-      // Unset the flag
+      // Disable the optOut flag if URL setting is false
       if (xpromoSetting === 'false') {
-        return merge(state, {
-          [STORE_KEY]: undefined,
-        });
+        return merge(state, {[STORE_KEY]: undefined});
       }
-
-      return merge(state, {
-        [STORE_KEY]: true,
-      });
+      // Enable the optOut flag (for all other cases)
+      return merge(state, {[STORE_KEY]: true });
     }
 
     default: return state;

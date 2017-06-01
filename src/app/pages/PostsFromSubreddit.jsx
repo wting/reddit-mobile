@@ -13,7 +13,6 @@ import XPromoListingClickModal from 'app/components/XPromoListingClickModal';
 
 import PostsFromSubredditHandler from 'app/router/handlers/PostsFromSubreddit';
 import { paramsToPostsListsId } from 'app/models/PostsList';
-
 import isFakeSubreddit from 'lib/isFakeSubreddit';
 
 const mapStateToProps = createSelector(

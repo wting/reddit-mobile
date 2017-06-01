@@ -1,30 +1,3 @@
-/*
- *   Inline-script (source)
- *   Compressed by: https://jscompress.com/
- *
- *  (function(){
- *    var showXpromo = false; 
- *    var isEnabled = false;
- *    var lsKey = 'xpromoInterstitial';
- *    var url = 'no_xpromo_interstitial';
- *    var par = 'app_inline_loader';
- *    try {
- *       if (window.localStorage){
- *           var lsOO = window.localStorage.optOuts;
- *           if (lsOO !== undefined && isEnabled){
- *             showXpromo = !JSON.parse(lsOO)[lsKey];
- *           }
- *       }
- *        var search = window.location.search;
- *        if (search.split(url).length>1 && isEnabled){
- *          showXpromo = !!(search.split(url+'=false').length>1);
- *        }
- *        document.getElementById(par).className += (showXpromo?' xpromo':'');
- *    } catch (e) {}
- *    console.log('=>', showXpromo);
- *  })()
- **/
-
 import React from 'react';
 import createTest from 'platform/createTest';
 import indexReducer from 'app/reducers';
@@ -46,7 +19,7 @@ const appentInitialHTML = () => {
 const applyInlineScript = (str, window) => {
   this.window = window;
   /*eslint-disable*/
-  eval(str);
+  return eval(str);
   /*eslint-enable*/
 };
 
@@ -68,8 +41,6 @@ createTest({
 
     it('And several internals...', () => {
       expect(optOut).to.have.property('scriptId');
-      expect(optOut).to.have.property('urlFlag');
-      expect(optOut).to.have.property('storageKey');
       expect(optOut).to.have.property('isEnabled');
     });
   });
@@ -78,15 +49,12 @@ createTest({
     it('OptOut is disabled (regulare)', (done) => {
       const optOut = new OptOutWrapper({ isEnabled: true });
       const script = optOut.getScript().__html;
-
       appentInitialHTML();
-
       jsdom.env({
         url: 'http://reddit.ru/', 'html': '',
-        onload: function(windows) {
-          applyInlineScript.call(optOut, script, windows);
-          const div = document.getElementById(optOut.scriptId);
-          expect(div.className.trim()).to.eql('xpromo');
+        onload: function(window) {
+          const result = applyInlineScript.call(optOut, script, window);
+          expect(result).to.eql(true);
           done();
         },
       });
@@ -95,13 +63,11 @@ createTest({
     it('OptOut is enabled (as URL-flag) ', (done) => {
       const optOut = new OptOutWrapper({ isEnabled: true });
       const script = optOut.getScript().__html;
-
       appentInitialHTML();
-
       jsdom.env({
         url: 'http://reddit.ru/?no_xpromo_interstitial=true', 'html': '',
-        onload: function(windows) {
-          applyInlineScript.call(optOut, script, windows);
+        onload: function(window) {
+          applyInlineScript.call(optOut, script, window);
           const div = document.getElementById(optOut.scriptId);
           expect(div.className.trim().length).to.eql(0);
           done();

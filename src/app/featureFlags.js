@@ -2,7 +2,7 @@ import Flags from '@r/flags';
 import sha1 from 'crypto-js/sha1';
 import url from 'url';
 import {
-  OPT_OUT_XPROMO_INTERSTITIAL,
+  OPT_OUT_FLAGS,
   flags as flagConstants,
 } from 'app/constants';
 import {
@@ -84,7 +84,7 @@ const config = {
 
   [XPROMOBANNER]: {
     and: [
-      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
+      { notOptedOut: OPT_OUT_FLAGS },
       { allowedPages: ['index', 'listing', 'comments'] },
       { allowNSFW: false },
       { allowedDevices: [IPHONE, ANDROID] },
@@ -326,7 +326,7 @@ const config = {
   },
   [VARIANT_MODAL_LISTING_CLICK_IOS]: {
     and: [
-      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
+      { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [IPHONE] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
@@ -343,7 +343,7 @@ const config = {
   },
   [VARIANT_MODAL_LISTING_CLICK_ANDROID]: {
     and: [
-      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
+      { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [ANDROID] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
@@ -360,7 +360,7 @@ const config = {
   },
   [VARIANT_XPROMO_AD_LOADING_IOS]: {
     and: [
-      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
+      { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { or: [
@@ -370,7 +370,7 @@ const config = {
   },
   [VARIANT_XPROMO_AD_LOADING_ANDROID]: {
     and: [
-      { notOptedOut: OPT_OUT_XPROMO_INTERSTITIAL.STORE_KEY },
+      { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { or: [
@@ -627,9 +627,16 @@ flags.addRule('allowedDevices', function (allowed) {
   return (!!device) && allowed.includes(device);
 });
 
-flags.addRule('notOptedOut', function (flag) {
-  const optedOut = this.state.optOuts[flag];
-  return !optedOut;
+// NOTE it is applyable for:
+// - string (value of STORE_KEY key)
+// - array of objects with STORE_KEY keys
+flags.addRule('notOptedOut', function (flagOrFlags) {
+  if (typeof flagOrFlags === 'string') {
+    return !(this.state.optOuts[flagOrFlags]);
+  }
+  return !(flagOrFlags.find((item={}) => {
+    return !!this.state.optOuts[item.STORE_KEY];
+  }));
 });
 
 // NOTE (prashant.singh - 07 November 2016): This is interim functionality to

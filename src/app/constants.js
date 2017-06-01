@@ -66,10 +66,29 @@ export const RECENT_CLICKS_LENGTH = 5;
 
 export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click_retry';
 
+/*
+ * OptOut flags
+ * Structure:
+ *  1) STORE_KEY { String } (required) — LocakStorage key name
+ *  2) URL_FLAG { String } (optional) — URL flag name (as URL flag, accept: [empty]/true/false)
+ *    (ex: URL_FLAG : 'no_xpromo_interstitial')
+ *    (OptOut is ON): http://../?no_xpromo_interstitial
+ *    (OptOut is ON): http://../?no_xpromo_interstitial=true
+ *    (OptOut is OFF): http://../no_xpromo_interstitial=false
+ */
 export const OPT_OUT_XPROMO_INTERSTITIAL = {
   STORE_KEY : 'xpromoInterstitial',
-  URL_FLAG : 'no_xpromo_interstitial',
+  URL_FLAG  : 'no_xpromo_interstitial',
 };
+export const OPT_OUT_XPROMO_INTERSTITIAL_MENU = {
+  STORE_KEY : 'xpromoInterstitialMenu',
+  URL_FLAG  : 'no_xpromo_interstitial_menu',
+};
+export const OPT_OUT_FLAGS = [
+  /* COMMENT any flag here to turn it OFF */
+  OPT_OUT_XPROMO_INTERSTITIAL,
+  OPT_OUT_XPROMO_INTERSTITIAL_MENU,
+];
 
 /**
  * Listing clicks have a target type,
