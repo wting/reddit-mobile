@@ -11,8 +11,8 @@ import menuItems from './SettingsOverlayMenuItems';
 import { COLOR_SCHEME } from 'app/constants';
 import { userAccountSelector } from 'app/selectors/userAccount';
 import { showXPromoOptOutMenuLink } from 'app/selectors/xpromo';
+import { setXPromoOptout } from 'app/actions/optOuts';
 import config from 'config';
-
 const { NIGHTMODE } = COLOR_SCHEME;
 
 const DESKTOP_TRACKING_PARAMS = {
@@ -46,12 +46,13 @@ export const renderLoginRow = () => (
   />
 );
 
-const xpromoOptOutLink = () => (
+const xpromoOptOutLink = (props) => (
   <LinkRow
     key='xpromo-off'
     text='Ask To Open In App (On)'
     icon='icon-linkout icon-large blue'
-    href={ '/?no_xpromo_interstitial_menu=true' }
+    noRoute={ true }
+    onClick={ props.dismissedXpromo }
   />
 );
 
@@ -136,7 +137,7 @@ export const SettingsOverlayMenu = (props) => {
         onClick={ props.onGoToDesktop }
       />
       {
-        optOut ? xpromoOptOutLink() : null
+        optOut ? xpromoOptOutLink(props) : null
       }
       <ExpandoRow
         key='about-reddit'
@@ -171,7 +172,7 @@ export const SettingsOverlayMenu = (props) => {
 };
 
 
-const mapStateToProps = createSelector(
+const selector = createSelector(
   state => state.compact,
   state => state.theme,
   state => state.platform.currentPage,
@@ -180,8 +181,13 @@ const mapStateToProps = createSelector(
   (compact, theme, pageData, optOut, user) => ({ compact, theme, pageData, optOut, user }),
 );
 
-const mergeProps = stateProps => ({
+const dispatcher = dispatch => ({
+  dismissedXpromo: () => dispatch(setXPromoOptout()),
+});
+
+const mergeProps = (stateProps, dispatchProps) => ({
   ...stateProps,
+  ...dispatchProps,
   onGoToDesktop: () => {
     // this cookie is telling our CDN, "when you see the www url, do NOT
     // direct user to the mweb experience"
@@ -192,4 +198,4 @@ const mergeProps = stateProps => ({
   },
 });
 
-export default connect(mapStateToProps, null, mergeProps)(SettingsOverlayMenu);
+export default connect(selector, dispatcher, mergeProps)(SettingsOverlayMenu);

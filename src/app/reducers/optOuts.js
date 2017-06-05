@@ -13,6 +13,7 @@
 
 import merge from 'platform/merge';
 import * as platformActions from 'platform/actions';
+import * as optOuts from 'app/actions/optOuts';
 import { OPT_OUT_FLAGS } from 'app/constants';
 
 export const DEFAULT = {};
@@ -37,6 +38,11 @@ export default function (state=DEFAULT, action={}) {
         return merge(state, {[STORE_KEY]: undefined});
       }
       // Enable the optOut flag (for all other cases)
+      return merge(state, {[STORE_KEY]: true });
+    }
+
+    case optOuts.OPTOUT_SET: {
+      const { STORE_KEY } = action.flag;
       return merge(state, {[STORE_KEY]: true });
     }
 

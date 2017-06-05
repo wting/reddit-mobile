@@ -10,6 +10,7 @@ import * as reportingActions from 'app/actions/reporting';
 import * as mailActions from 'app/actions/mail';
 import * as modToolsActions from 'app/actions/modTools';
 import * as votingActions from 'app/actions/vote';
+import * as optOuts from 'app/actions/optOuts';
 
 const DEFAULT = {
   isOpen: false,
@@ -50,6 +51,7 @@ export default function(state=DEFAULT, action={}) {
       });
     }
 
+    case optOuts.OPTOUT_SET:
     case replyActions.SUCCESS: {
       return merge(state, {
         isOpen: true,

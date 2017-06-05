@@ -1,9 +1,10 @@
+import routes from 'app/router';
 import createTest from 'platform/createTest';
 import { METHODS } from 'platform/router';
 import * as platformActions from 'platform/actions';
-import routes from 'app/router';
-import { OPT_OUT_XPROMO_INTERSTITIAL } from '../../app/constants';
+import * as optOutsAction from 'app/actions/optOuts';
 import optOuts, { DEFAULT } from './optOuts';
+import { OPT_OUT_XPROMO_INTERSTITIAL } from '../../app/constants';
 
 const { URL_FLAG, STORE_KEY } = OPT_OUT_XPROMO_INTERSTITIAL;
 
@@ -36,6 +37,13 @@ createTest({ reducers: { optOuts }, routes }, ({ getStore, expect }) => {
         const { optOuts } = store.getState();
         expect(optOuts[STORE_KEY]).to.eql(undefined);
       });
+    });
+
+    it('if setting up the new flag', () => {
+      const { store } = getStore({ optOuts: DEFAULT });
+      store.dispatch(optOutsAction.setFlag(OPT_OUT_XPROMO_INTERSTITIAL));
+      const { optOuts } = store.getState();
+      expect(optOuts[STORE_KEY]).to.eql(true);
     });
   });
 });
