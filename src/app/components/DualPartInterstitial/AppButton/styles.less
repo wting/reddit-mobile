@@ -1,4 +1,5 @@
 @import (reference) '~app/less/variables';
+@import (reference) '~app/less/themes/themeify';
 
 .appButton,
 a.appButton {
@@ -21,7 +22,7 @@ a.appButton {
 
   &.m-main,
   &.m-comment {
-    background: #27D2BB;
+    background: @mint;
     border-radius: 50px;
     font-size: 12px;
     font-weight: bold;
@@ -29,5 +30,20 @@ a.appButton {
     height: 0;
     line-height: 0px;
     vertical-align: middle;
+  }
+  &.m-adfeed {
+    .themeify({
+      color: @mint;
+      background: #fff;
+      border: 2px solid @mint;
+    }, @inNightMode: {
+      background: transparent;
+    });
+
+    height: 40px;
+    padding: 0 40px;
+    font-size: 13px;
+    line-height: 38px;
+    font-weight: bold;
   }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import throttle from 'lodash/throttle';
 import { createStructuredSelector } from 'reselect';
 import * as xpromoActions from 'app/actions/xpromo';
 import * as xpromoPersist from 'lib/xpromoPersistState';
@@ -18,9 +19,15 @@ import {
   scrollPastState,
   scrollStartState,
   isXPromoPersistent,
+  xpromoAdFeedVariant,
 } from 'app/selectors/xpromo';
 
 class XPromoWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.scrollListener = throttle(this.onScroll, 100);
+  }
 
   launchPersistentExperiment() {
     if (this.props.isXPromoPersistent) {
@@ -84,6 +91,7 @@ class XPromoWrapper extends React.Component {
       alreadyScrolledPast, 
       xpromoThemeIsUsual,
       isXPromoPersistent,
+      xpromoAdFeedVariant,
     } = this.props;
 
     // should appears only once on the start
@@ -111,6 +119,11 @@ class XPromoWrapper extends React.Component {
     // remove scroll events for usual xpromo theme 
     // (no needs to listen window up scrolling)
     if (xpromoThemeIsUsual && alreadyScrolledPast && !isXPromoPersistent) {
+      if (xpromoAdFeedVariant) {
+        dispatch(xpromoActions.trackXPromoEvent(
+          XPROMO_VIEW, { interstitial_type: xpromoAdFeedVariant})
+        );
+      }
       this.toggleOnScroll(false);
     }
   }
@@ -137,9 +150,9 @@ class XPromoWrapper extends React.Component {
 
   toggleOnScroll(state) {
     if (state) {
-      window.addEventListener('scroll', this.onScroll);
+      window.addEventListener('scroll', this.scrollListener);
     } else {
-      window.removeEventListener('scroll', this.onScroll);
+      window.removeEventListener('scroll', this.scrollListener);
     }
   }
 
@@ -166,7 +179,8 @@ const selector = createStructuredSelector({
   alreadyScrolledPast: state => scrollPastState(state),
   xpromoThemeIsUsual: state => xpromoThemeIsUsual(state),
   isInterstitialDismissed: state => dismissedState(state),
-  isXPromoPersistent: state => isXPromoPersistent(state),
+  isXPromoPersistent,
+  xpromoAdFeedVariant,
 });
 
 export default connect(selector)(XPromoWrapper);

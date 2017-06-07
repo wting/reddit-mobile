@@ -7,6 +7,7 @@ import {
   EVERY_DAY,
   flags as flagConstants,
   COLOR_SCHEME,
+  XPROMO_AD_FEED_TYPES,
   XPROMO_DISPLAY_THEMES,
   XPROMO_MODAL_LISTING_CLICK_NAME,
   OPT_OUT_XPROMO_INTERSTITIAL_MENU,
@@ -50,11 +51,18 @@ const {
   // XPromo Ad loading (preloader and Mobile App redirect button)
   VARIANT_XPROMO_AD_LOADING_IOS,
   VARIANT_XPROMO_AD_LOADING_ANDROID,
+
+  // XPromo Ad Feed inside the Listing pages
+  VARIANT_XPROMO_AD_FEED_IOS,
+  VARIANT_XPROMO_AD_FEED_ANDROID,
 } = flagConstants;
 
 const EXPERIMENT_FULL = [
-  VARIANT_XPROMO_AD_LOADING_IOS,
-  VARIANT_XPROMO_AD_LOADING_ANDROID,
+  VARIANT_XPROMO_AD_LOADING_IOS,      // should be on top
+  VARIANT_XPROMO_AD_LOADING_ANDROID,  // should be on top
+
+  VARIANT_XPROMO_AD_FEED_IOS,
+  VARIANT_XPROMO_AD_FEED_ANDROID,
   VARIANT_XPROMO_LOGIN_REQUIRED_IOS,
   VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID,
   VARIANT_XPROMO_LOGIN_REQUIRED_IOS_CONTROL,
@@ -93,6 +101,11 @@ const XPROMO_AD_LOADING_FLAGS = [
   VARIANT_XPROMO_AD_LOADING_ANDROID,
 ];
 
+const XPROMO_AD_FEED_FLAGS = [
+  VARIANT_XPROMO_AD_FEED_IOS,
+  VARIANT_XPROMO_AD_FEED_ANDROID,
+];
+
 const EXPERIMENT_NAMES = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_IOS]: 'mweb_xpromo_require_login_ios',
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID]: 'mweb_xpromo_require_login_android',
@@ -108,6 +121,8 @@ const EXPERIMENT_NAMES = {
   [VARIANT_XPROMO_PERSISTENT_ANDROID]: 'mweb_xpromo_persistent_android',
   [VARIANT_XPROMO_AD_LOADING_IOS]: 'mweb_xpromo_ad_loading_ios',
   [VARIANT_XPROMO_AD_LOADING_ANDROID]: 'mweb_xpromo_ad_loading_android',
+  [VARIANT_XPROMO_AD_FEED_IOS]: 'mweb_xpromo_ad_feed_ios',
+  [VARIANT_XPROMO_AD_FEED_ANDROID]: 'mweb_xpromo_ad_feed_android',
 };
 
 export function getRouteActionName(state) {
@@ -284,6 +299,22 @@ export function xpromoModalListingClickVariantInfo(state) {
     timeLimit: EXPERIMENT_FREQUENCY_VARIANTS[timePeriodString === 'hourly' ? EVERY_HOUR : EVERY_DAY],
     dismissible: dimissableString === 'dismissible',
   };
+}
+
+export function xpromoAdFeedIsVariantEnabled(state, checkableVariant) {
+  const experimentVariant = xpromoAdFeedVariant(state);
+  if (Array.isArray(checkableVariant)) {
+    return checkableVariant.some((variant) => (variant === experimentVariant));
+  }
+  return (experimentVariant === checkableVariant);
+}
+export function xpromoAdFeedVariant(state) {
+  const experiment = getExperimentDataByFlags(state, XPROMO_AD_FEED_FLAGS);
+  return experiment ? experiment.variant : undefined;
+}
+export function isXPromoInFeedEnabled(state) {
+  const { LISTING_BIG, LISTING_SMALL } = XPROMO_AD_FEED_TYPES;
+  return xpromoAdFeedIsVariantEnabled(state, [LISTING_BIG, LISTING_SMALL]);
 }
 
 /**

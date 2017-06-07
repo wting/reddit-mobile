@@ -3,6 +3,7 @@ import sha1 from 'crypto-js/sha1';
 import url from 'url';
 import {
   OPT_OUT_FLAGS,
+  XPROMO_AD_FEED_TYPES,
   flags as flagConstants,
 } from 'app/constants';
 import {
@@ -74,9 +75,13 @@ const {
   VARIANT_XPROMO_PERSISTENT_IOS,
   VARIANT_XPROMO_PERSISTENT_ANDROID,
 
-  // Ad loading (preloader and Mobile App redirect button)
+  // XPromo Ad loading (preloader and Mobile App redirect button)
   VARIANT_XPROMO_AD_LOADING_IOS,
   VARIANT_XPROMO_AD_LOADING_ANDROID,
+
+  // XPromo Ad Feed inside the Listing pages
+  VARIANT_XPROMO_AD_FEED_IOS,
+  VARIANT_XPROMO_AD_FEED_ANDROID,
 } = flagConstants;
 
 const config = {
@@ -378,6 +383,29 @@ const config = {
       ]},
     ],
   },
+
+  [VARIANT_XPROMO_AD_FEED_IOS]: {
+    and: [
+      { notOptedOut: OPT_OUT_FLAGS },
+      { allowedDevices: [IPHONE] },
+      { allowedPages: ['index', 'listing'] },
+      { or: [
+        { variant: `mweb_xpromo_ad_feed_ios:${XPROMO_AD_FEED_TYPES.LISTING_BIG}` },
+        { variant: `mweb_xpromo_ad_feed_ios:${XPROMO_AD_FEED_TYPES.LISTING_SMALL}` },
+      ]},
+    ],
+  },
+  [VARIANT_XPROMO_AD_FEED_ANDROID]: {
+    and: [
+      { notOptedOut: OPT_OUT_FLAGS },
+      { allowedDevices: [ANDROID] },
+      { allowedPages: ['index', 'listing'] },
+      { or: [
+        { variant: `mweb_xpromo_ad_feed_android:${XPROMO_AD_FEED_TYPES.LISTING_BIG}` },
+        { variant: `mweb_xpromo_ad_feed_android:${XPROMO_AD_FEED_TYPES.LISTING_SMALL}` },
+      ]},
+    ],
+  },
   [VARIANT_TITLE_EXPANDO]: {
     and: [
       { compact: true},
@@ -631,12 +659,15 @@ flags.addRule('allowedDevices', function (allowed) {
 // - string (value of STORE_KEY key)
 // - array of objects with STORE_KEY keys
 flags.addRule('notOptedOut', function (flagOrFlags) {
-  if (typeof flagOrFlags === 'string') {
-    return !(this.state.optOuts[flagOrFlags]);
+  if (this.state.optOuts) {
+    if (typeof flagOrFlags === 'string') {
+      return !(this.state.optOuts[flagOrFlags]);
+    }
+    return !(flagOrFlags.find((item={}) => {
+      return !!this.state.optOuts[item.STORE_KEY];
+    }));
   }
-  return !(flagOrFlags.find((item={}) => {
-    return !!this.state.optOuts[item.STORE_KEY];
-  }));
+  return false;
 });
 
 // NOTE (prashant.singh - 07 November 2016): This is interim functionality to
