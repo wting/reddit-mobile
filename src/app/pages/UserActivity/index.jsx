@@ -52,11 +52,12 @@ export const UserActivityPage = connect(mapStateToProps)(props => {
   const { name: userName, karma, subredditName } = queriedUser;
   const isMyUser = !!myUser && myUser.name === userName;
   const loaded = !!queriedUserRequest && !queriedUserRequest.loading;
+  const isContentOver18 = loaded && isContributor && !!userSubreddit && userSubreddit.over18;
 
   return (
     <NSFWWrapper
       isContentAdultStatusKnown={ loaded && (!!userSubreddit || !isContributor) }
-      isContentOver18={ isContributor && userSubreddit.over18 }
+      isContentOver18={ isContentOver18 }
       userPermitsOver18={ preferences.over18 }
     >
       <div className='UserProfilePage'>
