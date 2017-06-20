@@ -7,7 +7,6 @@ import {
   listingClickModalAppStoreClicked,
   listingClickModalDismissClicked,
 } from 'app/actions/xpromo';
-import { xpromoModalListingClickVariantInfo } from 'app/selectors/xpromo';
 
 import cx from 'lib/classNames';
 
@@ -17,13 +16,7 @@ const showing = state => state.xpromo.listingClick.active;
 
 const selector = createStructuredSelector({
   showing,
-  dismissible: state => {
-    if (!showing(state)) {
-      return null;
-    }
-
-    return xpromoModalListingClickVariantInfo(state).dismissible;
-  },
+  dismissible: state => (showing(state)? 'dismissible': null),
   returner: state => state.xpromo.listingClick.showingReturnerModal,
 });
 

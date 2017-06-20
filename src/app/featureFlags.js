@@ -62,8 +62,8 @@ const {
   VARIANT_XPROMO_INTERSTITIAL_COMMENTS_ANDROID,
 
   // Modal Listing Click
-  VARIANT_MODAL_LISTING_CLICK_IOS,
-  VARIANT_MODAL_LISTING_CLICK_ANDROID,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID,
 
   // Interstitial frequency
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS,
@@ -284,7 +284,7 @@ const config = {
       { allowedDevices: [IPHONE] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { not: { or: [
-        { peak: 'mweb_xpromo_modal_listing_click_retry_ios' },
+        { peak: 'mweb_xpromo_modal_listing_click_daily_dismissible_ios' },
         { peak: 'mweb_xpromo_require_login_ios' },
       ]}},
       { or: [
@@ -298,7 +298,7 @@ const config = {
       { allowedDevices: [ANDROID] },
       { allowedPages: ['index', 'listing', 'comments'] },
       { not: { or: [
-        { peak: 'mweb_xpromo_modal_listing_click_retry_android' },
+        { peak: 'mweb_xpromo_modal_listing_click_daily_dismissible_android' },
         { peak: 'mweb_xpromo_require_login_android' },
       ]}},
       { or: [
@@ -329,40 +329,26 @@ const config = {
       ] },
     ],
   },
-  [VARIANT_MODAL_LISTING_CLICK_IOS]: {
+  [XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS]: {
     and: [
       { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [IPHONE] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
-      {
-        or: [
-          { url: 'xpromolistingclick' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:hourly_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:hourly_nodismiss' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:daily_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_ios:daily_nodismiss' },
-        ],
-      },
+      { enabled: 'mweb_xpromo_modal_listing_click_daily_dismissible_ios' },
     ],
   },
-  [VARIANT_MODAL_LISTING_CLICK_ANDROID]: {
+
+  [XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID]: {
     and: [
       { notOptedOut: OPT_OUT_FLAGS },
       { allowedDevices: [ANDROID] },
       { allowNSFW: false },
       { allowedPages: ['index', 'listing'] },
-      {
-        or: [
-          { url: 'xpromolistingclick' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_android:hourly_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_android:hourly_nodismiss' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_android:daily_dismissible' },
-          { variant: 'mweb_xpromo_modal_listing_click_retry_android:daily_nodismiss' },
-        ],
-      },
+      { enabled: 'mweb_xpromo_modal_listing_click_daily_dismissible_android' },
     ],
   },
+
   [VARIANT_XPROMO_AD_LOADING_IOS]: {
     and: [
       { notOptedOut: OPT_OUT_FLAGS },

@@ -2,8 +2,6 @@ import { find, some } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 
 import {
-  EXPERIMENT_FREQUENCY_VARIANTS,
-  EVERY_HOUR,
   EVERY_DAY,
   flags as flagConstants,
   COLOR_SCHEME,
@@ -37,8 +35,8 @@ const {
   VARIANT_XPROMO_INTERSTITIAL_COMMENTS_ANDROID,
 
   // XPromo Modal Listing Click
-  VARIANT_MODAL_LISTING_CLICK_IOS,
-  VARIANT_MODAL_LISTING_CLICK_ANDROID,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID,
 
   // XPromo Interstitial Frequrency
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS,
@@ -82,8 +80,8 @@ const COMMENTS_PAGE_BANNER_FLAGS = [
 ];
 
 const MODAL_LISTING_CLICK_FLAGS = [
-  VARIANT_MODAL_LISTING_CLICK_IOS,
-  VARIANT_MODAL_LISTING_CLICK_ANDROID,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS,
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID,
 ];
 
 const INTERSTITIAL_FREQUENCY_FLAGS = [
@@ -113,8 +111,8 @@ const EXPERIMENT_NAMES = {
   [VARIANT_XPROMO_LOGIN_REQUIRED_ANDROID_CONTROL]: 'mweb_xpromo_require_login_android',
   [VARIANT_XPROMO_INTERSTITIAL_COMMENTS_IOS]: 'mweb_xpromo_interstitial_comments_ios',
   [VARIANT_XPROMO_INTERSTITIAL_COMMENTS_ANDROID]: 'mweb_xpromo_interstitial_comments_android',
-  [VARIANT_MODAL_LISTING_CLICK_IOS]: 'mweb_xpromo_modal_listing_click_retry_ios',
-  [VARIANT_MODAL_LISTING_CLICK_ANDROID]: 'mweb_xpromo_modal_listing_click_retry_android',
+  [XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS]: 'mweb_xpromo_modal_listing_click_daily_dismissible_ios',
+  [XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID]: 'mweb_xpromo_modal_listing_click_daily_dismissible_android',
   [VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS]: 'mweb_xpromo_interstitial_frequency_ios',
   [VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_ANDROID]: 'mweb_xpromo_interstitial_frequency_android',
   [VARIANT_XPROMO_PERSISTENT_IOS]: 'mweb_xpromo_persistent_ios',
@@ -278,29 +276,6 @@ export function getExperimentDataByFlags(state, FLAGS) {
   const experimentName = activeXPromoExperimentName(state, FLAGS);
   return getExperimentData(state, experimentName);
 }
-
-/**
- * @func xpromoModalListingClickVariantInfo
- * @param {object} state - our application's redux state
- *
- * @return {object} details of the experiment based on the variant name
- * @return {int} details.timeLimit - the length of time in epoch milliseconds
- *  to wait before showing the modal again
- * @return {bool} details.dimissable - true if the app store modal can be dimissed
- * NOTE: this function should not be called until we're sure the user is
- * eligible and bucketed in the experiment. It will throw or mis-fire bucketing
- * events otherwise
- */
-export function xpromoModalListingClickVariantInfo(state) {
-  const { variant } = getExperimentDataByFlags(state, MODAL_LISTING_CLICK_FLAGS);
-  const [ timePeriodString, dimissableString ] = variant.split('_');
-
-  return {
-    timeLimit: EXPERIMENT_FREQUENCY_VARIANTS[timePeriodString === 'hourly' ? EVERY_HOUR : EVERY_DAY],
-    dismissible: dimissableString === 'dismissible',
-  };
-}
-
 export function xpromoAdFeedIsVariantEnabled(state, checkableVariant) {
   const experimentVariant = xpromoAdFeedVariant(state);
   if (Array.isArray(checkableVariant)) {
@@ -334,9 +309,7 @@ function eligibleTimeForModalListingClick(state) {
   if (lastModalClick === 0) {
     return true;
   }
-
-  const { timeLimit } = xpromoModalListingClickVariantInfo(state);
-  const ineligibleLimit = lastModalClick + timeLimit;
+  const ineligibleLimit = lastModalClick + EVERY_DAY;
   return Date.now() > ineligibleLimit;
 }
 

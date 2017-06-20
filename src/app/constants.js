@@ -64,7 +64,7 @@ export const VISITED_POSTS_COUNT = 20;
 
 export const RECENT_CLICKS_LENGTH = 5;
 
-export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click_retry';
+export const XPROMO_MODAL_LISTING_CLICK_NAME = 'modal_listing_click';
 
 /*
  * OptOut flags
@@ -163,8 +163,8 @@ export const flags = {
   VARIANT_XPROMO_INTERSTITIAL_COMMENTS_ANDROID: 'experimentXPromoInterstitialCommentsAndroid',
 
   // XPromo Modal Listing Click
-  VARIANT_MODAL_LISTING_CLICK_IOS: 'experimentXPromoModalListingClickRetryIOS',
-  VARIANT_MODAL_LISTING_CLICK_ANDROID: 'experimentXPromoModalListingClickRetryAndroid',
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_IOS: 'XPromoModalListingClickDailyDismissibleIos',
+  XPROMO_MODAL_LISTING_CLICK_DAILY_DISMISSIBLE_ANDROID: 'XPromoModalListingClickDailyDismissibleAndroid',
 
   // XPromo Interstitial Frequrency
   VARIANT_XPROMO_INTERSTITIAL_FREQUENCY_IOS: 'experimentXPromoInterstitialFrequencyIos',
@@ -231,7 +231,6 @@ export const genericErrors = {
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 };
 
-export const EVERY_HOUR = 'every_hour';
 export const EVERY_DAY = 'every_day';
 export const EVERY_THREE_DAYS = 'every_three_days';
 export const EVERY_WEEK = 'every_week';
@@ -240,7 +239,6 @@ export const EVERY_TWO_WEEKS = 'every_two_weeks';
 const HOUR_IN_MS = 60 * 60 * 1000;
 
 export const EXPERIMENT_FREQUENCY_VARIANTS = {
-  [EVERY_HOUR]: HOUR_IN_MS,
   [EVERY_DAY]: 24 * HOUR_IN_MS,
   [EVERY_THREE_DAYS]: 3 * 24 * HOUR_IN_MS,
   [EVERY_WEEK]: 1 * 7 * 24 * HOUR_IN_MS,
