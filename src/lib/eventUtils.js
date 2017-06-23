@@ -146,21 +146,23 @@ export function getBasePayload(state) {
   return payload;
 }
 
-function getSessionId(state) {
-  const userCtxCookie = ((state) => {
-    const user = state.user;
-    const usertRequests = state.accountRequests[user.name];
-    if (usertRequests) {
-      if (usertRequests.meta) {
-        return usertRequests.meta['set-cookie'];
-      }
+// Currently, this userCtxCookie
+// (which comes from state.accountRequest.meta.set-cookie) helps
+// to get the correct SessionId from the server-side cookie, but
+// we can use it on both sides (on the client and server side).
+export function getUserCtxCookie(state) {
+  const user = state.user;
+  const usertRequests = state.accountRequests[user.name];
+  if (usertRequests) {
+    if (usertRequests.meta) {
+      return usertRequests.meta['set-cookie'];
     }
-  })(state);
+  }
+  return null;
+}
 
-  // Currently, this userCtxCookie
-  // (which comes from state.accountRequest.meta.set-cookie) helps
-  // to get the correct SessionId from the server-side cookie, but
-  // we can use it on both sides (on the client and server side).
+function getSessionId(state) {
+  const userCtxCookie = getUserCtxCookie(state);
   return getSessionIdFromCookie(userCtxCookie);
 }
 

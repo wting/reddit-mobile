@@ -8,29 +8,30 @@
 
 import cookies from 'js-cookie';
 
-const SESSION_COOKIE_KEY = 'session_tracker';
+export const SESSION_COOKIE_KEY = 'session_tracker';
 
-const parseServerSideCookies = (ctxCookie) => {
-  if (ctxCookie && process.env.ENV === 'server') {
-    const delimiter = ';';
-    const cookieStr = [ctxCookie].join(delimiter);
-    const getSession = new RegExp(`${SESSION_COOKIE_KEY}=(.+?;).*`, 'g');
-    const sessionCookie = cookieStr.replace(getSession, '$1');
-    const isSessionCookieWasFound = new RegExp(delimiter).test(sessionCookie);
-    return (isSessionCookieWasFound ? sessionCookie : '');
+export const parseServerSideCookies = (ctxCookie) => {
+  if (Array.isArray(ctxCookie) && process.env.ENV === 'server') {
+    const ctxCookieStr = ctxCookie.join();
+    const regexp = new RegExp(`${SESSION_COOKIE_KEY}=(.+?);`, 'g');
+    const result = regexp.exec(ctxCookieStr);
+    if (result) {
+      return result[1];
+    }
   }
-  return '';
 };
 
-export default (ctxCookie) => {
-  const cookieStr = (
-    cookies.get(SESSION_COOKIE_KEY) ||
-    parseServerSideCookies(ctxCookie)
-  );
-
+export const extractSessionID = (cookieStr) => {
   if (cookieStr) {
     const [sessionId] = cookieStr.split('.');
     return sessionId;
   }
-  return null;
+};
+
+export default (ctxCookie) => {
+  const sessionTrackerStr = (
+    cookies.get(SESSION_COOKIE_KEY) ||
+    parseServerSideCookies(ctxCookie)
+  );
+  return (extractSessionID(sessionTrackerStr) || null);
 };
