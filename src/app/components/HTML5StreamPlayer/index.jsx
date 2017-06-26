@@ -29,7 +29,7 @@ class HTML5StreamPlayer extends React.Component {
       videoEnded: false,
       videoFullScreen: false,
       debounceFunc: null,
-      videoInView: true,
+      videoInView: false,
       currentTime: '00:00',
       totalTime: '00:00',
       currentlyScrubbing: false,
@@ -116,6 +116,7 @@ class HTML5StreamPlayer extends React.Component {
   videoDidLoad = () => {
     if (this) {
       this.setState({videoLoaded: true});
+      this.isScrolledIntoView();
     }
   }
 
@@ -408,7 +409,7 @@ class HTML5StreamPlayer extends React.Component {
             <video
               data-dashjs-player
               loop={ this.props.isGif }
-              autoPlay={ this.state.autoPlay }
+              autoPlay={ false }
               muted={ this.state.videoMuted }
               onTimeUpdate={ this.updateTime }
               preload='metadata'
